@@ -296,10 +296,36 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     return lantern;
   }
 
+  // Authentic sculpted Greek lemon geometry with pointed tips & organic stem
+  const authenticLemonGeo = (() => {
+    const geo = new THREE.SphereGeometry(0.082, 16, 14);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      let x = pos.getX(i);
+      let y = pos.getY(i);
+      let z = pos.getZ(i);
+
+      y *= 1.34;
+      const absY = Math.abs(y);
+      if (absY > 0.075) {
+        const factor = (absY - 0.075) / 0.045;
+        const taper = 1.0 - factor * 0.42;
+        x *= taper;
+        z *= taper;
+        y += Math.sign(y) * factor * 0.018;
+      }
+      const bump = Math.sin(x * 55.0) * Math.cos(z * 55.0) * 0.0016;
+      pos.setXYZ(i, x + bump, y, z + bump);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  })();
+
+  const lemonStemGeo = new THREE.CylinderGeometry(0.006, 0.008, 0.048, 6);
+  lemonStemGeo.translate(0, 0.125, 0);
+
   function createLemonCluster(radius: number, leafCount: number, lemonCount: number): THREE.Group {
     const cluster = new THREE.Group();
-    const lemonGeo = new THREE.SphereGeometry(0.076, 14, 12);
-    lemonGeo.scale(0.82, 1.28, 0.82);
 
     for (let i = 0; i < leafCount; i++) {
       const leaf = new THREE.Mesh(pointedLeafGeo, lemonLeafMat);
@@ -318,7 +344,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
         Math.random() * Math.PI,
         Math.random() * Math.PI,
       );
-      const scale = 0.82 + Math.random() * 0.52;
+      const scale = 0.85 + Math.random() * 0.55;
       leaf.scale.setScalar(scale);
       leaf.castShadow = true;
       leaf.receiveShadow = true;
@@ -326,23 +352,30 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     }
 
     for (let i = 0; i < lemonCount; i++) {
-      const isOrange = Math.random() < 0.22;
-      const lemon = new THREE.Mesh(lemonGeo, isOrange ? orangeLemonMat : yellowLemonMat);
+      const isOrange = Math.random() < 0.18;
+      const lemonGrp = new THREE.Group();
+      const lemonMesh = new THREE.Mesh(authenticLemonGeo, isOrange ? orangeLemonMat : yellowLemonMat);
+      lemonMesh.castShadow = true;
+      lemonMesh.receiveShadow = true;
+      lemonGrp.add(lemonMesh);
+
+      const stemMesh = new THREE.Mesh(lemonStemGeo, trunkMat);
+      stemMesh.castShadow = true;
+      lemonGrp.add(stemMesh);
+
       const angle = (i / lemonCount) * Math.PI * 2 + Math.random() * 0.5;
-      const dist = (0.25 + Math.random() * 0.65) * radius;
-      lemon.position.set(
+      const dist = (0.22 + Math.random() * 0.68) * radius;
+      lemonGrp.position.set(
         Math.cos(angle) * dist,
-        -0.06 - Math.random() * (radius * 0.42),
+        -0.08 - Math.random() * (radius * 0.45),
         Math.sin(angle) * dist,
       );
-      lemon.rotation.set(
+      lemonGrp.rotation.set(
         (Math.random() - 0.5) * 0.35,
         Math.random() * Math.PI,
         (Math.random() - 0.5) * 0.35,
       );
-      lemon.castShadow = true;
-      lemon.receiveShadow = true;
-      cluster.add(lemon);
+      cluster.add(lemonGrp);
     }
 
     swayBranches.push(cluster);
@@ -528,6 +561,25 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   ropeCoil.position.set(-1.18, 0.38, 0);
   boatGroup.add(ropeCoil);
 
+  // Traditional wooden rudder and tiller arm at stern
+  const rudderBlade = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 0.45, 0.035),
+    teakWoodMat,
+  );
+  rudderBlade.position.set(1.68, 0.08, 0);
+  rudderBlade.rotation.z = -0.18;
+  rudderBlade.castShadow = true;
+  boatGroup.add(rudderBlade);
+
+  const tillerArm = new THREE.Mesh(
+    new THREE.BoxGeometry(0.42, 0.035, 0.035),
+    warmPostWoodMat,
+  );
+  tillerArm.position.set(1.42, 0.44, 0);
+  tillerArm.rotation.z = 0.08;
+  tillerArm.castShadow = true;
+  boatGroup.add(tillerArm);
+
   // Slender 4-pole frame + off-white bimini sun canopy (proportional height matching frames 01, 04, 08)
   const poleGeo = new THREE.CylinderGeometry(0.014, 0.014, 0.88, 8);
   for (const px of [-0.66, 0.66]) {
@@ -630,6 +682,36 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     shorePebbleInst.setMatrixAt(i, dummy.matrix);
   }
   worldGroup.add(shorePebbleInst);
+
+  // Traditional stone mooring bollard on the waterfront quay edge
+  const bollardPos = new THREE.Vector3(-0.92, 0.76, -2.82);
+  const bollardGeo = new THREE.CylinderGeometry(0.09, 0.12, 0.38, 16);
+  const bollardMesh = new THREE.Mesh(bollardGeo, patioMat);
+  bollardMesh.position.copy(bollardPos);
+  bollardMesh.castShadow = true;
+  bollardMesh.receiveShadow = true;
+
+  const bollardCap = new THREE.Mesh(
+    new THREE.SphereGeometry(0.1, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2),
+    darkIronMat,
+  );
+  bollardCap.position.set(bollardPos.x, bollardPos.y + 0.19, bollardPos.z);
+  bollardCap.castShadow = true;
+  worldGroup.add(bollardMesh, bollardCap);
+
+  // Realistic catenary mooring rope connecting boat's bow to the quay bollard
+  const boatBowWorld = new THREE.Vector3(-0.78, 0.46, -7.75);
+  const mooringCurve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(bollardPos.x, bollardPos.y + 0.12, bollardPos.z),
+    new THREE.Vector3(-0.88, 0.38, -3.8),
+    new THREE.Vector3(-0.84, 0.22, -5.3),
+    new THREE.Vector3(-0.81, 0.32, -6.6),
+    boatBowWorld,
+  ]);
+  const mooringGeo = new THREE.TubeGeometry(mooringCurve, 32, 0.018, 8, false);
+  const mooringRopeMesh = new THREE.Mesh(mooringGeo, warmPostWoodMat);
+  mooringRopeMesh.castShadow = true;
+  worldGroup.add(mooringRopeMesh);
 
   // Left Cycladic House (House A: features Pergola Stripes on roof in Ch 01 & Pastel Shutters facing +Z patio in Ch 02/04!)
   const leftHouse = createCycladicHouse(3.5, 4.75, 4.1);
@@ -899,8 +981,30 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   lowCanopy3.position.set(-0.15, 2.42, -0.15);
   harborTreeGroup.add(lowCanopy3);
 
-  // Courtyard Lemon Canopy for Chapter 01 (frames the foreground matching DACI75PglF1j3tK9k.mp4 frame_001!)
+  // Overarching branches directly framing Chapter 02 camera ([0.22, 1.88, 3.85]) overhead
+  const branchOverCam2 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.08, 2.8, 8), trunkMat);
+  branchOverCam2.position.set(-1.1, 1.95, 0.95);
+  branchOverCam2.rotation.z = 1.25;
+  branchOverCam2.rotation.y = 0.55;
+  branchOverCam2.castShadow = true;
+  harborTreeGroup.add(branchOverCam2);
+
+  const cam2OverheadCluster1 = createLemonCluster(0.82, 110, 12);
+  cam2OverheadCluster1.position.set(-1.35, 2.15, 1.45);
+  harborTreeGroup.add(cam2OverheadCluster1);
+
+  const cam2OverheadCluster2 = createLemonCluster(0.78, 95, 10);
+  cam2OverheadCluster2.position.set(-1.85, 2.08, 1.15);
+  harborTreeGroup.add(cam2OverheadCluster2);
+
+  // Courtyard Lemon Canopy for Chapter 01 (cinematic foreground framing matching DACI75PglF1j3tK9k.mp4 frame_001!)
   const courtyardCanopyPositions: [number, number, number, number][] = [
+    // Direct foreground canopy framing top/sides of camera at [0.0, 6.2, 5.0]
+    [0.0, 6.42, 4.82, 0.92],
+    [-0.58, 6.26, 4.65, 0.88],
+    [0.62, 6.28, 4.65, 0.88],
+    [-1.15, 6.08, 4.52, 0.95],
+    [1.18, 6.1, 4.52, 0.95],
     [-0.78, 5.25, 4.42, 1.05],
     [0.88, 5.15, 4.42, 1.12],
     [0.05, 4.82, 4.15, 1.25],

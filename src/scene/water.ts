@@ -130,15 +130,43 @@ export function createAegeanWater(): WaterHandles {
         );
       }
 
-      // Organic sunlight caustics network
-      float causticsPatt(vec2 uv, float t) {
-        vec2 p = uv;
-        float c = 0.0;
-        c += sin(p.x * 2.8 + t * 1.2 + sin(p.y * 3.2 - t * 0.9));
-        c += sin(p.y * 3.1 - t * 1.1 + sin(p.x * 2.9 + t * 1.0));
-        c += sin((p.x + p.y) * 2.4 + t * 1.4);
-        c = c / 3.0;
-        return pow(clamp(c * 0.5 + 0.5, 0.0, 1.0), 3.5);
+      // High-precision Voronoi cellular refraction caustics network
+      vec2 voroHash(vec2 p) {
+        p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+        return fract(sin(p) * 43758.5453);
+      }
+
+      float voronoiCaustics(vec2 p, float t) {
+        vec2 n = floor(p);
+        vec2 f = fract(p);
+        float md1 = 8.0;
+        float md2 = 8.0;
+
+        for (int j = -1; j <= 1; j++) {
+          for (int i = -1; i <= 1; i++) {
+            vec2 g = vec2(float(i), float(j));
+            vec2 o = voroHash(n + g);
+            o = 0.5 + 0.42 * sin(t * 1.35 + 6.2831 * o);
+            vec2 r = g + o - f;
+            float d = dot(r, r);
+            if (d < md1) {
+              md2 = md1;
+              md1 = d;
+            } else if (d < md2) {
+              md2 = d;
+            }
+          }
+        }
+        // Caustic web lines are formed along the boundary where md2 approaches md1
+        float border = sqrt(md2) - sqrt(md1);
+        return pow(clamp(1.0 - smoothstep(0.02, 0.28, border), 0.0, 1.0), 2.2);
+      }
+
+      float organicCaustics(vec2 uv, float t) {
+        float c1 = voronoiCaustics(uv * 1.8, t * 1.1);
+        float c2 = voronoiCaustics(uv * 3.4 + vec2(1.7, 3.2), t * 1.45);
+        float waveInterfere = sin(uv.x * 3.2 + t * 0.8) * sin(uv.y * 3.2 - t * 0.9) * 0.5 + 0.5;
+        return (c1 * 0.65 + c2 * 0.35) * (0.75 + 0.25 * waveInterfere);
       }
 
       void main() {
@@ -155,9 +183,7 @@ export function createAegeanWater(): WaterHandles {
         float shallowGrad = 1.0 - smoothstep(0.0, 0.45, shoreFactor);
 
         // Dancing sunlight caustics on shallow seabed
-        float c1 = causticsPatt(vWorldPos.xz * 1.6, uTime * 1.2);
-        float c2 = causticsPatt(vWorldPos.xz * 2.8 + 2.4, uTime * 1.6);
-        float caustics = (c1 * 0.6 + c2 * 0.4) * uClarity;
+        float caustics = organicCaustics(vWorldPos.xz, uTime) * uClarity;
 
         // Submerged seabed pebble tone visible through clear shallows
         float pebble = smoothNoise(vWorldPos.xz * 6.0) * 0.5 + smoothNoise(vWorldPos.xz * 14.0) * 0.5;
