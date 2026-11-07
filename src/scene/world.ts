@@ -948,25 +948,25 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
 
   // Harbor Patio Furniture (exact full-view composition for Chapters 02 & 04 matching frame_004 & frame_008!)
   const leftBistro = createBistroTable();
-  leftBistro.position.set(-1.42, 0.74, 0.25);
+  leftBistro.position.set(-2.2, 0.74, 0.1);
   worldGroup.add(leftBistro);
 
   const mintChair1 = createCafeChair(mintChairMat);
-  mintChair1.position.set(-2.18, 0.74, 0.35);
+  mintChair1.position.set(-2.75, 0.74, 0.2);
   mintChair1.rotation.y = 1.25;
   worldGroup.add(mintChair1);
 
   const mintChair2 = createCafeChair(mintChairMat);
-  mintChair2.position.set(-0.75, 0.74, 0.18);
+  mintChair2.position.set(-1.65, 0.74, 0.05);
   mintChair2.rotation.y = -1.25;
   worldGroup.add(mintChair2);
 
   const rightBistro = createBistroTable();
-  rightBistro.position.set(1.52, 0.74, 1.05);
+  rightBistro.position.set(2.2, 0.74, 0.8);
   worldGroup.add(rightBistro);
 
   const teakChair = createCafeChair(teakWoodMat);
-  teakChair.position.set(0.88, 0.74, 1.12);
+  teakChair.position.set(1.65, 0.74, 0.9);
   teakChair.rotation.y = 1.08;
   worldGroup.add(teakChair);
 
@@ -1012,47 +1012,77 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   lowCanopy3.position.set(-0.15, 2.42, -0.15);
   harborTreeGroup.add(lowCanopy3);
 
-  // Overarching branches directly framing Chapter 02 camera ([0.22, 1.88, 3.85]) overhead
-  const branchOverCam2 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.08, 2.8, 8), trunkMat);
-  branchOverCam2.position.set(-1.1, 1.95, 0.95);
-  branchOverCam2.rotation.z = 1.25;
-  branchOverCam2.rotation.y = 0.55;
-  branchOverCam2.castShadow = true;
-  harborTreeGroup.add(branchOverCam2);
+  // Chapter 01 Foreground Courtyard Set (matching aegean_ref_01.jpg perfectly!)
+  const centerBistro = createBistroTable();
+  centerBistro.position.set(0.0, 0.74, 0.45);
+  worldGroup.add(centerBistro);
 
-  const cam2OverheadCluster1 = createLemonCluster(0.82, 110, 12);
-  cam2OverheadCluster1.position.set(-1.35, 2.15, 1.45);
-  harborTreeGroup.add(cam2OverheadCluster1);
+  const centerChairL = createCafeChair(teakWoodMat);
+  centerChairL.position.set(-0.68, 0.74, 0.55);
+  centerChairL.rotation.y = 1.15;
+  worldGroup.add(centerChairL);
 
-  const cam2OverheadCluster2 = createLemonCluster(0.78, 95, 10);
-  cam2OverheadCluster2.position.set(-1.85, 2.08, 1.15);
-  harborTreeGroup.add(cam2OverheadCluster2);
+  const centerChairR = createCafeChair(teakWoodMat);
+  centerChairR.position.set(0.68, 0.74, 0.55);
+  centerChairR.rotation.y = -1.15;
+  worldGroup.add(centerChairR);
 
-  // Courtyard Lemon Canopy for Chapter 01 (cinematic lower-third framing matching DACI75PglF1j3tK9k.mp4 frame_001!)
+  const planterL = createTerracottaPlanter(0.95);
+  planterL.position.set(-1.25, 0.74, 0.65);
+  worldGroup.add(planterL);
+
+  const planterR = createTerracottaPlanter(0.95);
+  planterR.position.set(1.25, 0.74, 0.65);
+  worldGroup.add(planterR);
+
+  // Left Lemon Tree Trunk (arching up & inward from left courtyard)
+  const leftLemonTrunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.09, 0.16, 2.4, 12),
+    trunkMat,
+  );
+  leftLemonTrunk.position.set(-1.85, 1.68, 1.25);
+  leftLemonTrunk.rotation.z = -0.28;
+  leftLemonTrunk.rotation.x = -0.12;
+  leftLemonTrunk.castShadow = true;
+  worldGroup.add(leftLemonTrunk);
+
+  // Right Lemon Tree Trunk in Terracotta Planter (arching up & inward from right courtyard)
+  const rightLemonPlanter = createTerracottaPlanter(1.1);
+  rightLemonPlanter.position.set(1.85, 0.74, 1.25);
+  worldGroup.add(rightLemonPlanter);
+
+  const rightLemonTrunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.09, 0.16, 2.4, 12),
+    trunkMat,
+  );
+  rightLemonTrunk.position.set(1.78, 1.68, 1.25);
+  rightLemonTrunk.rotation.z = 0.28;
+  rightLemonTrunk.rotation.x = -0.12;
+  rightLemonTrunk.castShadow = true;
+  worldGroup.add(rightLemonTrunk);
+
+  // Courtyard Lemon Canopy Framing for Chapter 01 (forming the organic arch framing frame_001!)
   const courtyardCanopyPositions: [number, number, number, number, number][] = [
     // [cx, cy, cz, radius, lemonCount]
-    // Bottom-left foreground framing (sloping up toward Left House)
-    [-1.65, 5.65, -0.95, 0.88, 2],
-    [-1.15, 5.25, -1.05, 0.82, 2],
-    [-0.65, 4.85, -1.15, 0.76, 1],
+    // Left arch framing (slopes up toward center peak)
+    [-1.85, 2.45, 1.05, 0.80, 5],
+    [-1.45, 2.62, 1.15, 0.82, 6],
+    [-1.05, 2.75, 1.25, 0.78, 6],
+    [-0.65, 2.85, 1.35, 0.72, 5],
+    [-0.32, 2.92, 1.45, 0.68, 4],
 
-    // Bottom-center low foreground (keeps boat #86 and turquoise cove 100% visible and unblocked!)
-    [-0.15, 4.15, -1.25, 0.68, 0],
-    [0.18, 4.12, -1.25, 0.68, 1],
+    // Right arch framing (slopes up toward center peak)
+    [1.85, 2.45, 1.05, 0.80, 5],
+    [1.45, 2.62, 1.15, 0.82, 6],
+    [1.05, 2.75, 1.25, 0.78, 6],
+    [0.65, 2.85, 1.35, 0.72, 5],
+    [0.32, 2.92, 1.45, 0.68, 4],
 
-    // Bottom-right foreground framing (sloping up toward Right House)
-    [0.68, 4.85, -1.15, 0.76, 2],
-    [1.18, 5.25, -1.05, 0.82, 2],
-    [1.65, 5.65, -0.95, 0.88, 2],
-
-    // Courtyard midground foliage
-    [-1.45, 4.25, -1.85, 0.95, 1],
-    [1.35, 4.25, -1.85, 0.95, 1],
-    [-0.55, 3.85, -2.25, 0.85, 0],
-    [0.55, 3.85, -2.25, 0.85, 0],
+    // Center canopy arch peak (overhead only, y=3.02, leaves center vista clear!)
+    [0.0, 3.02, 1.48, 0.65, 4],
   ];
   for (const [cx, cy, cz, cr, cl] of courtyardCanopyPositions) {
-    const cluster = createLemonCluster(cr, 135, cl);
+    const cluster = createLemonCluster(cr, 125, cl);
     cluster.position.set(cx, cy, cz);
     worldGroup.add(cluster);
   }

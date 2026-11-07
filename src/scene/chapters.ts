@@ -18,9 +18,9 @@ export const CHAPTERS: ChapterSpec[] = [
     kicker: "01 / UNDER THE LEMON TREE",
     titleLines: ["A little closer", "to the sea."],
     subtitle: "Salt in the air. Sun on the stone.",
-    cameraPos: [0.0, 8.2, 0.5],
-    lookAt: [0.12, 0.8, -6.5],
-    fov: 42,
+    cameraPos: [0.0, 2.32, 3.25],
+    lookAt: [0.0, 1.35, -7.5],
+    fov: 44,
   },
   {
     id: "little-harbor",
@@ -29,8 +29,8 @@ export const CHAPTERS: ChapterSpec[] = [
     kicker: "02 / THE LITTLE HARBOR",
     titleLines: ["Nothing to do.", "Nowhere to hurry."],
     subtitle: "A blue table. A boat on a quiet tide.",
-    cameraPos: [0.22, 1.88, 3.85],
-    lookAt: [-0.05, 1.72, -6.8],
+    cameraPos: [0.22, 1.85, 3.45],
+    lookAt: [-0.05, 1.65, -7.5],
     fov: 43,
   },
   {
