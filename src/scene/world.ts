@@ -997,23 +997,27 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   cam2OverheadCluster2.position.set(-1.85, 2.08, 1.15);
   harborTreeGroup.add(cam2OverheadCluster2);
 
-  // Courtyard Lemon Canopy for Chapter 01 (cinematic foreground framing matching DACI75PglF1j3tK9k.mp4 frame_001!)
+  // Courtyard Lemon Canopy for Chapter 01 (cinematic lower-third framing matching DACI75PglF1j3tK9k.mp4 frame_001!)
   const courtyardCanopyPositions: [number, number, number, number][] = [
-    // Direct foreground canopy framing top/sides of camera at [0.0, 6.2, 5.0]
-    [0.0, 6.42, 4.82, 0.92],
-    [-0.58, 6.26, 4.65, 0.88],
-    [0.62, 6.28, 4.65, 0.88],
-    [-1.15, 6.08, 4.52, 0.95],
-    [1.18, 6.1, 4.52, 0.95],
-    [-0.78, 5.25, 4.42, 1.05],
-    [0.88, 5.15, 4.42, 1.12],
-    [0.05, 4.82, 4.15, 1.25],
-    [-1.45, 4.95, 3.85, 1.12],
-    [1.35, 4.95, 3.85, 1.15],
-    [-0.45, 4.35, 2.85, 1.18],
-    [0.55, 4.35, 2.85, 1.22],
-    [-1.75, 3.85, 1.65, 1.15],
-    [1.15, 3.82, 1.75, 1.15],
+    // Bottom-left foreground framing (sloping up toward Left House)
+    [-1.65, 4.85, 2.85, 0.95],
+    [-1.15, 4.55, 2.75, 0.88],
+    [-0.65, 4.25, 2.65, 0.82],
+
+    // Bottom-center low foreground (keeps boat #86 and turquoise cove 100% visible and unblocked!)
+    [-0.15, 3.92, 2.45, 0.78],
+    [0.18, 3.88, 2.45, 0.78],
+
+    // Bottom-right foreground framing (sloping up toward Right House)
+    [0.68, 4.25, 2.65, 0.82],
+    [1.18, 4.55, 2.75, 0.88],
+    [1.65, 4.85, 2.85, 0.95],
+
+    // Courtyard midground foliage under the courtyard terrace
+    [-1.45, 3.85, 1.65, 1.05],
+    [1.35, 3.85, 1.65, 1.05],
+    [-0.55, 3.45, 1.25, 0.95],
+    [0.55, 3.45, 1.25, 0.95],
   ];
   for (const [cx, cy, cz, cr] of courtyardCanopyPositions) {
     const cluster = createLemonCluster(cr, 155, 16);
