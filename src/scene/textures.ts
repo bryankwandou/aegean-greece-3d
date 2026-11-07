@@ -17,7 +17,7 @@ export function createStuccoTexture(): { map: THREE.CanvasTexture; bumpMap: THRE
   ctx.fillRect(0, 0, 512, 512);
 
   // Subtle Mediterranean lime plaster variation
-  for (let i = 0; i < 6500; i++) {
+  for (let i = 0; i < 7200; i++) {
     const x = Math.random() * 512;
     const y = Math.random() * 512;
     const r = 1 + Math.random() * 4;
@@ -27,7 +27,7 @@ export function createStuccoTexture(): { map: THREE.CanvasTexture; bumpMap: THRE
   }
 
   // Horizontal Cycladic plaster score lines (matching reference video walls)
-  ctx.strokeStyle = "rgba(185, 180, 168, 0.38)";
+  ctx.strokeStyle = "rgba(182, 176, 162, 0.42)";
   ctx.lineWidth = 2;
   for (const y of [128, 256, 384]) {
     ctx.beginPath();
@@ -35,12 +35,12 @@ export function createStuccoTexture(): { map: THREE.CanvasTexture; bumpMap: THRE
     ctx.lineTo(512, y);
     ctx.stroke();
 
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.65)";
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.68)";
     ctx.beginPath();
     ctx.moveTo(0, y + 2);
     ctx.lineTo(512, y + 2);
     ctx.stroke();
-    ctx.strokeStyle = "rgba(185, 180, 168, 0.38)";
+    ctx.strokeStyle = "rgba(182, 176, 162, 0.42)";
   }
 
   const map = new THREE.CanvasTexture(canvas);
@@ -59,21 +59,21 @@ export function createStuccoTexture(): { map: THREE.CanvasTexture; bumpMap: THRE
 
 export function createWeatheredTurquoiseWood(): THREE.CanvasTexture {
   const [canvas, ctx] = makeCanvas(512, 512);
-  ctx.fillStyle = "#7BC0B7";
+  ctx.fillStyle = "#85C4BC";
   ctx.fillRect(0, 0, 512, 512);
 
   // Wood plank lines and weathered white/teal paint streaks
-  for (let i = 0; i < 480; i++) {
+  for (let i = 0; i < 620; i++) {
     const y = Math.random() * 512;
-    const h = 1 + Math.random() * 3;
-    const isLight = Math.random() > 0.45;
-    ctx.fillStyle = isLight ? "rgba(225, 240, 236, 0.24)" : "rgba(56, 118, 112, 0.22)";
+    const h = 1 + Math.random() * 3.5;
+    const isLight = Math.random() > 0.42;
+    ctx.fillStyle = isLight ? "rgba(235, 244, 240, 0.28)" : "rgba(48, 108, 102, 0.24)";
     ctx.fillRect(0, y, 512, h);
   }
 
   // Plank seams
-  ctx.strokeStyle = "rgba(38, 82, 78, 0.42)";
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = "rgba(38, 82, 78, 0.46)";
+  ctx.lineWidth = 2.5;
   for (let y = 64; y < 512; y += 64) {
     ctx.beginPath();
     ctx.moveTo(0, y);
@@ -88,16 +88,16 @@ export function createWeatheredTurquoiseWood(): THREE.CanvasTexture {
 
 export function createPastelShutterTexture(): THREE.CanvasTexture {
   const [canvas, ctx] = makeCanvas(512, 512);
-  ctx.fillStyle = "#54B4A6";
+  ctx.fillStyle = "#56B2A4";
   ctx.fillRect(0, 0, 512, 512);
 
   // Sun-weathered patina on turquoise shutters (matching Chapter 04)
-  for (let i = 0; i < 900; i++) {
+  for (let i = 0; i < 1100; i++) {
     const x = Math.random() * 512;
     const y = Math.random() * 512;
-    const w = 12 + Math.random() * 65;
+    const w = 14 + Math.random() * 75;
     const h = 2 + Math.random() * 4;
-    ctx.fillStyle = Math.random() > 0.5 ? "rgba(215, 238, 232, 0.18)" : "rgba(32, 96, 88, 0.18)";
+    ctx.fillStyle = Math.random() > 0.48 ? "rgba(222, 240, 234, 0.22)" : "rgba(30, 92, 84, 0.20)";
     ctx.fillRect(x, y, w, h);
   }
 
@@ -108,34 +108,36 @@ export function createPastelShutterTexture(): THREE.CanvasTexture {
 
 export function createCobbleTexture(): { map: THREE.CanvasTexture; bumpMap: THREE.CanvasTexture } {
   const [canvas, ctx] = makeCanvas(512, 512);
-  ctx.fillStyle = "#B8B09C";
+  ctx.fillStyle = "#C6BDA6";
   ctx.fillRect(0, 0, 512, 512);
 
-  // Mortar grit
-  for (let i = 0; i < 3000; i++) {
+  // Limestone concentric weathering rings & mortar grit
+  for (let i = 0; i < 3800; i++) {
     const x = Math.random() * 512;
     const y = Math.random() * 512;
-    ctx.fillStyle = Math.random() > 0.5 ? "rgba(95, 88, 76, 0.25)" : "rgba(225, 218, 202, 0.25)";
-    ctx.fillRect(x, y, 2, 2);
+    const w = 2 + Math.random() * 8;
+    const h = 1 + Math.random() * 3;
+    ctx.fillStyle = Math.random() > 0.48 ? "rgba(105, 96, 82, 0.24)" : "rgba(238, 232, 214, 0.28)";
+    ctx.fillRect(x, y, w, h);
   }
 
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(4, 4);
+  tex.repeat.set(3, 3);
   tex.colorSpace = THREE.SRGBColorSpace;
 
   const bump = new THREE.CanvasTexture(canvas);
   bump.wrapS = THREE.RepeatWrapping;
   bump.wrapT = THREE.RepeatWrapping;
-  bump.repeat.set(4, 4);
+  bump.repeat.set(3, 3);
 
   return { map: tex, bumpMap: bump };
 }
 
 export function createSlateLaneTexture(): THREE.CanvasTexture {
   const [canvas, ctx] = makeCanvas(512, 512);
-  ctx.fillStyle = "#ACA592";
+  ctx.fillStyle = "#8C928E";
   ctx.fillRect(0, 0, 512, 512);
 
   const cols = 4;
@@ -145,11 +147,10 @@ export function createSlateLaneTexture(): THREE.CanvasTexture {
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      const offsetX = (r % 2) * (cellW * 0.25);
-      const x = ((c * cellW + offsetX) % 512);
+      const x = c * cellW;
       const y = r * cellH;
-      const base = 188 + Math.floor(Math.random() * 26);
-      ctx.fillStyle = `rgb(${base}, ${base - 4}, ${base - 16})`;
+      const base = 112 + Math.floor(Math.random() * 22);
+      ctx.fillStyle = `rgb(${base - 4}, ${base + 2}, ${base})`;
       ctx.fillRect(x + 3, y + 3, cellW - 6, cellH - 6);
     }
   }
@@ -157,7 +158,51 @@ export function createSlateLaneTexture(): THREE.CanvasTexture {
   const tex = new THREE.CanvasTexture(canvas);
   tex.wrapS = THREE.RepeatWrapping;
   tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(2, 5);
+  tex.repeat.set(1, 3);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+export function createLimestoneTileTexture(): THREE.CanvasTexture {
+  const [canvas, ctx] = makeCanvas(512, 512);
+  ctx.fillStyle = "#9C9684";
+  ctx.fillRect(0, 0, 512, 512);
+
+  const cols = 4;
+  const rows = 6;
+  const cellW = 512 / cols;
+  const cellH = 512 / rows;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = c * cellW;
+      const y = r * cellH;
+      const base = 204 + Math.floor(Math.random() * 18);
+      ctx.fillStyle = `rgb(${base}, ${base - 4}, ${base - 24})`;
+      ctx.fillRect(x + 3, y + 3, cellW - 6, cellH - 6);
+    }
+  }
+
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(1, 2);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+export function createBoatBowNumberTexture(): THREE.CanvasTexture {
+  const [canvas, ctx] = makeCanvas(256, 128);
+  ctx.fillStyle = "#F7F6F1";
+  ctx.fillRect(0, 0, 256, 128);
+
+  ctx.fillStyle = "#2E4A52";
+  ctx.font = "700 54px Georgia, serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("86", 128, 66);
+
+  const tex = new THREE.CanvasTexture(canvas);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
@@ -208,4 +253,3 @@ export function createWickerTexture(): THREE.CanvasTexture {
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
-

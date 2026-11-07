@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import {
+  createBoatBowNumberTexture,
   createCobbleTexture,
+  createLimestoneTileTexture,
   createLinenWeaveTexture,
   createPastelShutterTexture,
   createSlateLaneTexture,
@@ -30,23 +32,23 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     color: 0xf8f6f0,
     map: stucco.map,
     bumpMap: stucco.bumpMap,
-    bumpScale: 0.014,
+    bumpScale: 0.015,
     roughness: 0.84,
     metalness: 0.02,
   });
 
   const warmPlasterFloorMat = new THREE.MeshStandardMaterial({
-    color: 0xeae5d7,
+    color: 0xebe5d6,
     map: stucco.map,
     bumpMap: stucco.bumpMap,
     bumpScale: 0.01,
-    roughness: 0.88,
+    roughness: 0.86,
   });
 
   const shutterTex = createPastelShutterTexture();
   const turquoiseShutterMat = new THREE.MeshStandardMaterial({
     map: shutterTex,
-    roughness: 0.68,
+    roughness: 0.66,
     metalness: 0.04,
   });
 
@@ -59,7 +61,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   const weatheredTableTex = createWeatheredTurquoiseWood();
   const bistroTableMat = new THREE.MeshStandardMaterial({
     map: weatheredTableTex,
-    roughness: 0.66,
+    roughness: 0.64,
     metalness: 0.04,
   });
 
@@ -69,7 +71,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   });
 
   const teakWoodMat = new THREE.MeshStandardMaterial({
-    color: 0x6e4f35,
+    color: 0x694a30,
     roughness: 0.76,
   });
 
@@ -79,62 +81,104 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   });
 
   const terracottaMat = new THREE.MeshStandardMaterial({
-    color: 0xb85b3a,
-    roughness: 0.76,
+    color: 0xba5d3c,
+    roughness: 0.74,
     metalness: 0.03,
   });
 
   const darkIronMat = new THREE.MeshStandardMaterial({
-    color: 0x1f2426,
-    roughness: 0.45,
-    metalness: 0.75,
+    color: 0x1e2326,
+    roughness: 0.44,
+    metalness: 0.76,
   });
 
   const trunkMat = new THREE.MeshStandardMaterial({
-    color: 0x3b2c20,
+    color: 0x38281c,
     roughness: 0.9,
   });
 
   const lemonLeafMat = new THREE.MeshStandardMaterial({
-    color: 0x2c5225,
-    roughness: 0.4,
-    metalness: 0.05,
+    color: 0x294e22,
+    roughness: 0.38,
+    metalness: 0.06,
+    side: THREE.DoubleSide,
+  });
+
+  const ivyLeafMat = new THREE.MeshStandardMaterial({
+    color: 0x264820,
+    roughness: 0.42,
+    metalness: 0.04,
+    side: THREE.DoubleSide,
+  });
+
+  const jasmineWhiteMat = new THREE.MeshStandardMaterial({
+    color: 0xfaf8f2,
+    roughness: 0.35,
     side: THREE.DoubleSide,
   });
 
   const oliveLeafMat = new THREE.MeshStandardMaterial({
-    color: 0x5e7554,
-    roughness: 0.56,
+    color: 0x5c7352,
+    roughness: 0.54,
     metalness: 0.04,
     side: THREE.DoubleSide,
   });
 
   const bougainvilleaPetalMat = new THREE.MeshStandardMaterial({
-    color: 0xc91c64,
-    roughness: 0.46,
+    color: 0xc81962,
+    roughness: 0.44,
     side: THREE.DoubleSide,
   });
 
   const bougainvilleaAccentMat = new THREE.MeshStandardMaterial({
-    color: 0xe3347b,
+    color: 0xe23279,
     roughness: 0.42,
     side: THREE.DoubleSide,
   });
 
   const yellowLemonMat = new THREE.MeshStandardMaterial({
-    color: 0xebd038,
-    roughness: 0.34,
+    color: 0xecd238,
+    roughness: 0.32,
     metalness: 0.04,
   });
 
   const orangeLemonMat = new THREE.MeshStandardMaterial({
-    color: 0xde782c,
-    roughness: 0.36,
+    color: 0xdc762a,
+    roughness: 0.35,
     metalness: 0.04,
   });
 
   const swayBranches: THREE.Object3D[] = [];
   const clothSheets: ClothSheetData[] = [];
+
+  // Shared pointed citrus/ficus leaf geometry with 3D midrib curvature
+  const pointedLeafGeo = (() => {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0);
+    s.quadraticCurveTo(0.068, 0.09, 0, 0.23);
+    s.quadraticCurveTo(-0.068, 0.09, 0, 0);
+    const geo = new THREE.ShapeGeometry(s, 5);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const lx = pos.getX(i);
+      const ly = pos.getY(i);
+      const arch = Math.sin((ly / 0.23) * Math.PI) * 0.022 - Math.abs(lx) * 0.18;
+      pos.setZ(i, arch);
+    }
+    geo.computeVertexNormals();
+    return geo;
+  })();
+
+  // Pointed ovate bougainvillea bract geometry (delicate 3-bract paper-flower cluster, NOT flat pentagons)
+  const bractGeo = (() => {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0);
+    s.quadraticCurveTo(0.026, 0.024, 0, 0.058);
+    s.quadraticCurveTo(-0.026, 0.024, 0, 0);
+    const geo = new THREE.ShapeGeometry(s, 4);
+    geo.computeVertexNormals();
+    return geo;
+  })();
 
   function createShutteredWindow(
     width: number,
@@ -171,8 +215,8 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
 
       panel.add(stileL, stileR, railTop, railMid, railBot);
 
-      const slatCount = Math.floor(height / 0.075);
-      const slatGeo = new THREE.BoxGeometry(halfW - 0.08, 0.045, 0.035);
+      const slatCount = Math.floor(height / 0.072);
+      const slatGeo = new THREE.BoxGeometry(halfW - 0.08, 0.044, 0.035);
       for (let i = 0; i < slatCount; i++) {
         const y = -height * 0.44 + (i / (slatCount - 1)) * (height * 0.88);
         const slat = new THREE.Mesh(slatGeo, shutterMaterial);
@@ -225,21 +269,11 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
 
   function createLemonCluster(radius: number, leafCount: number, lemonCount: number): THREE.Group {
     const cluster = new THREE.Group();
-    const leafGeo = new THREE.ShapeGeometry(
-      (() => {
-        const s = new THREE.Shape();
-        s.moveTo(0, 0);
-        s.quadraticCurveTo(0.075, 0.11, 0, 0.26);
-        s.quadraticCurveTo(-0.075, 0.11, 0, 0);
-        return s;
-      })(),
-    );
-
-    const lemonGeo = new THREE.SphereGeometry(0.078, 14, 12);
-    lemonGeo.scale(0.82, 1.26, 0.82);
+    const lemonGeo = new THREE.SphereGeometry(0.076, 14, 12);
+    lemonGeo.scale(0.82, 1.28, 0.82);
 
     for (let i = 0; i < leafCount; i++) {
-      const leaf = new THREE.Mesh(leafGeo, lemonLeafMat);
+      const leaf = new THREE.Mesh(pointedLeafGeo, lemonLeafMat);
       const u = Math.random();
       const v = Math.random();
       const theta = u * 2.0 * Math.PI;
@@ -255,7 +289,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
         Math.random() * Math.PI,
         Math.random() * Math.PI,
       );
-      const scale = 0.82 + Math.random() * 0.55;
+      const scale = 0.82 + Math.random() * 0.52;
       leaf.scale.setScalar(scale);
       leaf.castShadow = true;
       leaf.receiveShadow = true;
@@ -266,16 +300,16 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
       const isOrange = Math.random() < 0.22;
       const lemon = new THREE.Mesh(lemonGeo, isOrange ? orangeLemonMat : yellowLemonMat);
       const angle = (i / lemonCount) * Math.PI * 2 + Math.random() * 0.5;
-      const dist = (0.28 + Math.random() * 0.62) * radius;
+      const dist = (0.25 + Math.random() * 0.65) * radius;
       lemon.position.set(
         Math.cos(angle) * dist,
         -0.06 - Math.random() * (radius * 0.42),
         Math.sin(angle) * dist,
       );
       lemon.rotation.set(
-        (Math.random() - 0.5) * 0.4,
+        (Math.random() - 0.5) * 0.35,
         Math.random() * Math.PI,
-        (Math.random() - 0.5) * 0.4,
+        (Math.random() - 0.5) * 0.35,
       );
       lemon.castShadow = true;
       lemon.receiveShadow = true;
@@ -293,31 +327,85 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     density: number,
   ): THREE.Group {
     const patch = new THREE.Group();
-    const petalGeo = new THREE.CircleGeometry(0.072, 5);
-    const leafGeo = new THREE.CircleGeometry(0.062, 6);
 
     for (let i = 0; i < density; i++) {
       const x = (Math.random() - 0.5) * width;
       const y = (Math.random() - 0.5) * height;
       const z = (Math.random() - 0.5) * depth;
 
-      const isFlower = Math.random() < 0.68;
-      const mat = isFlower
-        ? Math.random() > 0.4
-          ? bougainvilleaPetalMat
-          : bougainvilleaAccentMat
-        : lemonLeafMat;
-      const mesh = new THREE.Mesh(isFlower ? petalGeo : leafGeo, mat);
-      mesh.position.set(x, y, z);
-      mesh.rotation.set(
+      const isFlower = Math.random() < 0.66;
+      if (isFlower) {
+        const mat = Math.random() > 0.42 ? bougainvilleaPetalMat : bougainvilleaAccentMat;
+        // 3-bract pointed magenta paper-flower cluster
+        for (let b = 0; b < 3; b++) {
+          const bract = new THREE.Mesh(bractGeo, mat);
+          bract.position.set(x + (b - 1) * 0.018, y + (b % 2) * 0.012, z);
+          bract.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+          );
+          bract.scale.setScalar(1.22 + Math.random() * 0.68);
+          bract.castShadow = true;
+          patch.add(bract);
+        }
+      } else {
+        const leaf = new THREE.Mesh(pointedLeafGeo, lemonLeafMat);
+        leaf.position.set(x, y, z);
+        leaf.rotation.set(
+          Math.random() * Math.PI,
+          Math.random() * Math.PI,
+          Math.random() * Math.PI,
+        );
+        leaf.scale.setScalar(0.45 + Math.random() * 0.35);
+        leaf.castShadow = true;
+        patch.add(leaf);
+      }
+    }
+    swayBranches.push(patch);
+    return patch;
+  }
+
+  // Green climbing ivy + white star-jasmine flowers for the Right Harbor House & Teal Door (matching frame_004!)
+  function createJasmineIvyPatch(
+    width: number,
+    height: number,
+    depth: number,
+    leafCount: number,
+    blossomCount: number,
+  ): THREE.Group {
+    const patch = new THREE.Group();
+    const starPetalGeo = new THREE.CircleGeometry(0.022, 5);
+
+    for (let i = 0; i < leafCount; i++) {
+      const leaf = new THREE.Mesh(pointedLeafGeo, ivyLeafMat);
+      leaf.position.set(
+        (Math.random() - 0.5) * width,
+        (Math.random() - 0.5) * height,
+        (Math.random() - 0.5) * depth,
+      );
+      leaf.rotation.set(
         Math.random() * Math.PI,
         Math.random() * Math.PI,
         Math.random() * Math.PI,
       );
-      mesh.scale.setScalar(0.8 + Math.random() * 0.8);
-      mesh.castShadow = true;
-      patch.add(mesh);
+      leaf.scale.setScalar(0.42 + Math.random() * 0.32);
+      leaf.castShadow = true;
+      patch.add(leaf);
     }
+
+    for (let i = 0; i < blossomCount; i++) {
+      const star = new THREE.Mesh(starPetalGeo, jasmineWhiteMat);
+      star.position.set(
+        (Math.random() - 0.5) * width,
+        (Math.random() - 0.5) * height,
+        (Math.random() - 0.5) * depth + 0.02,
+      );
+      star.rotation.y = Math.PI / 2 + (Math.random() - 0.5) * 0.4;
+      star.rotation.z = Math.random() * Math.PI;
+      patch.add(star);
+    }
+
     swayBranches.push(patch);
     return patch;
   }
@@ -326,12 +414,12 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   // 1. TRADITIONAL GREEK WOODEN BOAT (#86) IN THE CRYSTAL COVE
   // ============================================================================
   const boatGroup = new THREE.Group();
-  boatGroup.position.set(0.55, 0.14, -7.25);
-  boatGroup.rotation.y = -0.34;
+  boatGroup.position.set(0.38, 0.1, -8.15);
+  boatGroup.rotation.y = -0.36;
   worldGroup.add(boatGroup);
 
-  const hullLength = 4.6;
-  const hullWidth = 1.62;
+  const hullLength = 3.35;
+  const hullWidth = 1.16;
   const hullShape = new THREE.Shape();
   hullShape.moveTo(-hullLength * 0.5, 0);
   hullShape.quadraticCurveTo(-hullLength * 0.15, hullWidth * 0.56, hullLength * 0.35, hullWidth * 0.48);
@@ -340,73 +428,105 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   hullShape.quadraticCurveTo(-hullLength * 0.15, -hullWidth * 0.56, -hullLength * 0.5, 0);
 
   const hullExtrude = new THREE.ExtrudeGeometry(hullShape, {
-    depth: 0.62,
+    depth: 0.46,
     bevelEnabled: true,
     bevelSegments: 3,
     steps: 1,
-    bevelSize: 0.08,
-    bevelThickness: 0.08,
+    bevelSize: 0.055,
+    bevelThickness: 0.055,
   });
   hullExtrude.rotateX(-Math.PI / 2);
 
-  const boatHullMat = new THREE.MeshStandardMaterial({ color: 0xf7f6f1, roughness: 0.52 });
+  const boatHullMat = new THREE.MeshStandardMaterial({ color: 0xf7f6f1, roughness: 0.48 });
   const hullMesh = new THREE.Mesh(hullExtrude, boatHullMat);
-  hullMesh.position.y = -0.08;
+  hullMesh.position.y = -0.06;
   hullMesh.castShadow = true;
   hullMesh.receiveShadow = true;
   boatGroup.add(hullMesh);
 
-  const gunwaleMat = new THREE.MeshStandardMaterial({ color: 0x7e2d22, roughness: 0.5 });
+  // Registration badge "86" on starboard/port bow (visible in frame_001 & frame_008)
+  const bowBadgeTex = createBoatBowNumberTexture();
+  const bowBadgeMat = new THREE.MeshStandardMaterial({ map: bowBadgeTex, roughness: 0.5 });
+  for (const side of [-1, 1]) {
+    const badge = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.14), bowBadgeMat);
+    badge.position.set(-0.88, 0.25, side * (hullWidth * 0.46));
+    badge.rotation.y = side > 0 ? 0.18 : Math.PI - 0.18;
+    boatGroup.add(badge);
+  }
+
+  const gunwaleMat = new THREE.MeshStandardMaterial({ color: 0x6e281e, roughness: 0.48 });
+  const boatTealMat = new THREE.MeshStandardMaterial({ color: 0x267470, roughness: 0.56 });
+
   const deckMesh = new THREE.Mesh(
-    new THREE.BoxGeometry(hullLength * 0.78, 0.06, hullWidth * 0.72),
-    teakWoodMat,
+    new THREE.BoxGeometry(hullLength * 0.78, 0.04, hullWidth * 0.74),
+    new THREE.MeshStandardMaterial({ color: 0x4a3828, roughness: 0.82 }),
   );
-  deckMesh.position.set(-0.08, 0.38, 0);
+  deckMesh.position.set(-0.04, 0.24, 0);
   deckMesh.receiveShadow = true;
   boatGroup.add(deckMesh);
 
   for (const side of [-1, 1]) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(hullLength * 0.86, 0.09, 0.09), gunwaleMat);
-    rail.position.set(-0.05, 0.58, side * (hullWidth * 0.42));
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(hullLength * 0.86, 0.065, 0.065), gunwaleMat);
+    rail.position.set(-0.04, 0.43, side * (hullWidth * 0.43));
     rail.castShadow = true;
     boatGroup.add(rail);
+
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(hullLength * 0.82, 0.024, 0.02), boatTealMat);
+    stripe.position.set(-0.04, 0.16, side * (hullWidth * 0.48));
+    boatGroup.add(stripe);
   }
 
-  const boatTealMat = new THREE.MeshStandardMaterial({ color: 0x2c7873, roughness: 0.6 });
-  for (const bx of [-1.05, -0.15, 0.75]) {
-    const bench = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.06, hullWidth * 0.76), boatTealMat);
-    bench.position.set(bx, 0.49, 0);
+  // Interior wooden ribs & teal thwarts (benches) visible from Chapter 01
+  for (const rx of [-0.95, -0.45, 0.05, 0.55, 0.95]) {
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.16, hullWidth * 0.78), teakWoodMat);
+    rib.position.set(rx, 0.34, 0);
+    boatGroup.add(rib);
+  }
+
+  for (const bx of [-0.68, 0.05, 0.68]) {
+    const bench = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.045, hullWidth * 0.78), boatTealMat);
+    bench.position.set(bx, 0.37, 0);
     bench.castShadow = true;
     boatGroup.add(bench);
   }
 
-  const poleGeo = new THREE.CylinderGeometry(0.018, 0.018, 1.32, 8);
-  for (const px of [-0.88, 0.88]) {
-    for (const pz of [-0.52, 0.52]) {
+  // Coiled bow rope
+  const ropeCoil = new THREE.Mesh(
+    new THREE.TorusGeometry(0.11, 0.028, 8, 18),
+    warmPostWoodMat,
+  );
+  ropeCoil.rotation.x = Math.PI / 2;
+  ropeCoil.position.set(-1.18, 0.38, 0);
+  boatGroup.add(ropeCoil);
+
+  // Slender 4-pole frame + off-white bimini sun canopy (proportional height matching frames 01, 04, 08)
+  const poleGeo = new THREE.CylinderGeometry(0.014, 0.014, 0.88, 8);
+  for (const px of [-0.66, 0.66]) {
+    for (const pz of [-0.38, 0.38]) {
       const pole = new THREE.Mesh(poleGeo, darkIronMat);
-      pole.position.set(px, 1.16, pz);
+      pole.position.set(px, 0.82, pz);
       pole.castShadow = true;
       boatGroup.add(pole);
     }
   }
 
-  const canopyGeo = new THREE.PlaneGeometry(2.12, 1.32, 16, 12);
+  const canopyGeo = new THREE.PlaneGeometry(1.56, 0.96, 14, 10);
   canopyGeo.rotateX(-Math.PI / 2);
   const canopyPos = canopyGeo.attributes.position;
   for (let i = 0; i < canopyPos.count; i++) {
     const cx = canopyPos.getX(i);
     const cz = canopyPos.getZ(i);
-    const arch = Math.cos(cz * 1.8) * 0.09 - Math.abs(cx) * 0.03;
+    const arch = Math.cos(cz * 2.2) * 0.065 - Math.abs(cx) * 0.02;
     canopyPos.setY(i, arch);
   }
   canopyGeo.computeVertexNormals();
   const canopyMat = new THREE.MeshStandardMaterial({
-    color: 0xf8f6f0,
+    color: 0xf6f4ec,
     roughness: 0.72,
     side: THREE.DoubleSide,
   });
   const canopyMesh = new THREE.Mesh(canopyGeo, canopyMat);
-  canopyMesh.position.set(0, 1.82, 0);
+  canopyMesh.position.set(0, 1.25, 0);
   canopyMesh.castShadow = true;
   canopyMesh.receiveShadow = true;
   boatGroup.add(canopyMesh);
@@ -416,33 +536,33 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   // ============================================================================
   const cobbleTex = createCobbleTexture();
   const patioMat = new THREE.MeshStandardMaterial({
-    color: 0xc2ba9f,
+    color: 0xb8af96,
     map: cobbleTex.map,
     bumpMap: cobbleTex.bumpMap,
-    bumpScale: 0.04,
-    roughness: 0.88,
+    bumpScale: 0.035,
+    roughness: 0.9,
   });
 
-  // Harbor platform ends cleanly at z = -3.7 and x = -4.25 so crystal-clear turquoise water comes right up to the patio edge and Bougainvillea lane!
-  const harborBase = new THREE.Mesh(new THREE.BoxGeometry(11.2, 1.2, 8.2), patioMat);
-  harborBase.position.set(1.35, 0.15, 0.4);
+  // Harbor platform ends at z = -2.85 so shallow coastal pebbles & clear turquoise water meet the patio edge
+  const harborBase = new THREE.Mesh(new THREE.BoxGeometry(10.8, 1.15, 7.6), patioMat);
+  harborBase.position.set(1.15, 0.12, 0.95);
   harborBase.receiveShadow = true;
   harborBase.castShadow = true;
   worldGroup.add(harborBase);
 
-  // 3D Sculpted rounded Mediterranean cobblestones across the harbor terrace (z from -3.5 to +3.2)
-  const cobbleStoneGeo = new THREE.SphereGeometry(0.28, 12, 10);
-  cobbleStoneGeo.scale(1.18, 0.32, 1.05);
+  // 3D Sculpted rounded Mediterranean limestone cobblestones across the harbor terrace (z from -2.7 to +3.6)
+  const cobbleStoneGeo = new THREE.SphereGeometry(0.24, 14, 10);
+  cobbleStoneGeo.scale(1.16, 0.34, 1.04);
   const cobbleInstMat = new THREE.MeshStandardMaterial({
-    color: 0xc8c0a8,
+    color: 0xd2cab2,
     map: cobbleTex.map,
     bumpMap: cobbleTex.bumpMap,
-    bumpScale: 0.025,
-    roughness: 0.86,
+    bumpScale: 0.028,
+    roughness: 0.85,
   });
 
-  const cobbleCols = 20;
-  const cobbleRows = 15;
+  const cobbleCols = 22;
+  const cobbleRows = 18;
   const cobbleInst = new THREE.InstancedMesh(cobbleStoneGeo, cobbleInstMat, cobbleCols * cobbleRows);
   cobbleInst.receiveShadow = true;
   cobbleInst.castShadow = true;
@@ -451,15 +571,15 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   let cIdx = 0;
   for (let r = 0; r < cobbleRows; r++) {
     for (let c = 0; c < cobbleCols; c++) {
-      const gx = -3.2 + c * 0.42 + (r % 2) * 0.18 + (Math.random() - 0.5) * 0.06;
-      const gz = -3.45 + r * 0.42 + (Math.random() - 0.5) * 0.06;
-      dummy.position.set(gx, 0.74 + (Math.random() - 0.5) * 0.02, gz);
+      const gx = -3.8 + c * 0.36 + (r % 2) * 0.16 + (Math.random() - 0.5) * 0.05;
+      const gz = -2.65 + r * 0.35 + (Math.random() - 0.5) * 0.05;
+      dummy.position.set(gx, 0.72 + (Math.random() - 0.5) * 0.02, gz);
       dummy.rotation.set(
         (Math.random() - 0.5) * 0.08,
         Math.random() * Math.PI,
         (Math.random() - 0.5) * 0.08,
       );
-      const s = 0.82 + Math.random() * 0.35;
+      const s = 0.78 + Math.random() * 0.34;
       dummy.scale.set(s, 0.85 + Math.random() * 0.25, s * (0.9 + Math.random() * 0.2));
       dummy.updateMatrix();
       cobbleInst.setMatrixAt(cIdx++, dummy.matrix);
@@ -467,102 +587,130 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   }
   worldGroup.add(cobbleInst);
 
+  // Submerged & shoreline natural pebbles along the water's edge (z = -2.8 to -5.5, visible in frames 01, 04, 08, 16)
+  const shorePebbleInst = new THREE.InstancedMesh(cobbleStoneGeo, patioMat, 140);
+  for (let i = 0; i < 140; i++) {
+    const px = -14.5 + Math.random() * 21.0;
+    const pz = -2.75 - Math.random() * 2.8;
+    const py = -0.05 - Math.max(0, (-2.8 - pz) * 0.14);
+    dummy.position.set(px, py, pz);
+    dummy.rotation.set(Math.random() * 0.2, Math.random() * Math.PI, Math.random() * 0.2);
+    const s = 0.65 + Math.random() * 0.85;
+    dummy.scale.set(s, 0.7 + Math.random() * 0.5, s);
+    dummy.updateMatrix();
+    shorePebbleInst.setMatrixAt(i, dummy.matrix);
+  }
+  worldGroup.add(shorePebbleInst);
+
   // Left Cycladic House (House A: features Pergola Stripes on roof in Ch 01 & Pastel Shutters facing +Z patio in Ch 02/04!)
-  const leftHouse = createCycladicHouse(3.6, 4.75, 4.2);
-  leftHouse.position.set(-2.45, 0.75, -3.85);
+  const leftHouse = createCycladicHouse(3.5, 4.75, 4.1);
+  leftHouse.position.set(-2.35, 0.72, -3.8);
   worldGroup.add(leftHouse);
 
-  // Terracotta pergola slats on the inner roof edge of Left House (matching Chapter 01 frame_001-003)
+  // 15 Terracotta pergola slats across the inner roof edge of Left House (matching Chapter 01 frame_001!)
   const slatGroup = new THREE.Group();
-  slatGroup.position.set(-1.55, 5.56, -2.15);
-  for (let i = 0; i < 14; i++) {
-    const slat = new THREE.Mesh(new THREE.BoxGeometry(0.068, 0.035, 0.78), terracottaMat);
-    slat.position.set(-1.35 + i * 0.21, 0, 0);
-    slat.rotation.y = 0.18;
+  slatGroup.position.set(-2.25, 5.73, -2.22);
+  for (let i = 0; i < 15; i++) {
+    const slat = new THREE.Mesh(new THREE.BoxGeometry(0.068, 0.038, 0.78), terracottaMat);
+    slat.position.set(-1.35 + i * 0.195, 0, 0);
+    slat.rotation.y = 0.22;
     slat.castShadow = true;
     slat.receiveShadow = true;
     slatGroup.add(slat);
   }
   worldGroup.add(slatGroup);
 
-  // Iconic Pastel Turquoise Louvered Shutters on South/Patio-Facing Wall of Left House (facing +Z so camera at z=+2.15..2.45 looking towards -Z sees it straight-on just like frames 04 & 08!)
-  const pastelShutterPatio = createShutteredWindow(1.18, 1.68, turquoiseShutterMat);
-  pastelShutterPatio.position.set(-1.95, 2.62, -1.72);
+  // Bougainvillea vine climbing the front-right corner of Left House (visible in Chapter 01 frame_001 & Chapter 04 frame_008!)
+  const leftHouseCornerVine = createBougainvilleaPatch(0.55, 2.65, 0.65, 210);
+  leftHouseCornerVine.position.set(-0.56, 3.85, -3.45);
+  worldGroup.add(leftHouseCornerVine);
+
+  // Iconic Pastel Turquoise Louvered Shutters on South/Patio-Facing Wall of Left House
+  const pastelShutterPatio = createShutteredWindow(1.22, 1.74, turquoiseShutterMat);
+  pastelShutterPatio.position.set(-1.92, 2.62, -1.72);
   pastelShutterPatio.rotation.y = 0;
   worldGroup.add(pastelShutterPatio);
 
   // Sea-facing turquoise shutter on Left House (visible in Aerial Overview frame 15 & 16!)
   const seaShutterLeft = createShutteredWindow(1.15, 1.65, turquoiseShutterMat);
-  seaShutterLeft.position.set(-2.45, 2.65, -5.97);
+  seaShutterLeft.position.set(-2.35, 2.65, -5.88);
   seaShutterLeft.rotation.y = Math.PI;
   worldGroup.add(seaShutterLeft);
 
   // Side shutter on Left House facing courtyard
-  const sideShutterLeft = createShutteredWindow(0.95, 1.45, turquoiseShutterMat);
-  sideShutterLeft.position.set(-0.62, 2.65, -3.85);
+  const sideShutterLeft = createShutteredWindow(0.92, 1.42, turquoiseShutterMat);
+  sideShutterLeft.position.set(-0.57, 2.65, -3.85);
   sideShutterLeft.rotation.y = Math.PI / 2;
   worldGroup.add(sideShutterLeft);
 
-  // Right Cycladic House (House B: features Bougainvillea corner in Ch 01 & Weathered Teal Door + Ivy in Ch 02)
+  // Right Cycladic House (House B: features Bougainvillea corner in Ch 01 & Weathered Teal Door + Green Jasmine Ivy in Ch 02)
   const rightHouse = createCycladicHouse(4.8, 5.35, 5.4);
-  rightHouse.position.set(4.35, 0.75, -2.85);
+  rightHouse.position.set(4.35, 0.72, -2.65);
   worldGroup.add(rightHouse);
 
-  const rightHouseBougainvillea = createBougainvilleaPatch(1.3, 3.6, 1.3, 380);
-  rightHouseBougainvillea.position.set(1.88, 4.15, -1.2);
-  worldGroup.add(rightHouseBougainvillea);
+  const rightHouseBougainvilleaTop = createBougainvilleaPatch(1.25, 2.4, 1.25, 320);
+  rightHouseBougainvilleaTop.position.set(1.88, 4.55, -1.55);
+  worldGroup.add(rightHouseBougainvilleaTop);
 
-  // Weathered Teal Door with white jasmine flowers & ivy on Right House (visible on right side of Chapter 02 frame_004)
+  const rightHouseBougainvilleaLow = createBougainvilleaPatch(1.35, 1.95, 1.25, 280);
+  rightHouseBougainvilleaLow.position.set(2.15, 2.85, 0.35);
+  worldGroup.add(rightHouseBougainvilleaLow);
+
+  // Weathered Teal Door with Green Climbing Ivy & White Star-Jasmine Flowers on Right House (matching frame_004!)
   const tealDoorGroup = new THREE.Group();
-  tealDoorGroup.position.set(1.92, 2.05, -2.15);
+  tealDoorGroup.position.set(1.92, 2.02, -1.55);
   tealDoorGroup.rotation.y = -Math.PI / 2;
   const tealDoorMesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1.15, 2.25, 0.08),
+    new THREE.BoxGeometry(1.12, 2.25, 0.08),
     new THREE.MeshStandardMaterial({ color: 0x0e879c, roughness: 0.62 }),
   );
   tealDoorMesh.castShadow = true;
   tealDoorGroup.add(tealDoorMesh);
 
-  const ivyPatch = createBougainvilleaPatch(1.4, 2.2, 0.3, 140);
-  ivyPatch.position.set(-0.35, 0.25, 0.12);
-  tealDoorGroup.add(ivyPatch);
+  const jasmineWallIvy = createJasmineIvyPatch(1.25, 2.35, 0.22, 185, 42);
+  jasmineWallIvy.position.set(-0.92, 0.22, 0.08);
+  tealDoorGroup.add(jasmineWallIvy);
+
+  const jasmineDoorBlossoms = createJasmineIvyPatch(0.85, 1.65, 0.15, 45, 34);
+  jasmineDoorBlossoms.position.set(-0.08, -0.05, 0.08);
+  tealDoorGroup.add(jasmineDoorBlossoms);
   worldGroup.add(tealDoorGroup);
 
   function createBistroTable(): THREE.Group {
     const table = new THREE.Group();
 
-    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.66, 0.66, 0.045, 32), bistroTableMat);
+    const top = new THREE.Mesh(new THREE.CylinderGeometry(0.64, 0.64, 0.042, 32), bistroTableMat);
     top.position.y = 0.76;
     top.castShadow = true;
     top.receiveShadow = true;
     table.add(top);
 
-    const legGeo = new THREE.CylinderGeometry(0.018, 0.018, 0.82, 8);
+    const legGeo = new THREE.CylinderGeometry(0.017, 0.017, 0.82, 8);
     for (let i = 0; i < 4; i++) {
       const angle = (i * Math.PI) / 2 + Math.PI / 4;
       const leg = new THREE.Mesh(legGeo, darkIronMat);
-      leg.position.set(Math.cos(angle) * 0.28, 0.38, Math.sin(angle) * 0.28);
+      leg.position.set(Math.cos(angle) * 0.26, 0.38, Math.sin(angle) * 0.26);
       leg.rotation.z = Math.cos(angle) * 0.22;
       leg.rotation.x = -Math.sin(angle) * 0.22;
       leg.castShadow = true;
       table.add(leg);
     }
 
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.014, 8, 24), darkIronMat);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.014, 8, 24), darkIronMat);
     ring.rotation.x = Math.PI / 2;
     ring.position.y = 0.28;
     table.add(ring);
 
     const bowlMat = new THREE.MeshStandardMaterial({ color: 0x2b6e8c, roughness: 0.35 });
     const bowl = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.21, 0.12, 0.075, 20),
+      new THREE.CylinderGeometry(0.2, 0.11, 0.072, 20),
       bowlMat,
     );
-    bowl.position.y = 0.815;
+    bowl.position.y = 0.812;
     bowl.castShadow = true;
     table.add(bowl);
 
-    const lemonGeo = new THREE.SphereGeometry(0.062, 12, 10);
+    const lemonGeo = new THREE.SphereGeometry(0.06, 12, 10);
     lemonGeo.scale(0.85, 1.22, 0.85);
     const lemonOffsets: [number, number, number][] = [
       [-0.07, 0.87, -0.04],
@@ -588,7 +736,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     const chair = new THREE.Group();
     const seatY = 0.45;
 
-    const legGeo = new THREE.BoxGeometry(0.035, 0.56, 0.035);
+    const legGeo = new THREE.BoxGeometry(0.034, 0.56, 0.034);
     for (const side of [-0.19, 0.19]) {
       const legF = new THREE.Mesh(legGeo, mat);
       legF.position.set(side, 0.24, 0.02);
@@ -600,7 +748,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
       legB.rotation.x = -0.34;
       legB.castShadow = true;
 
-      const postBack = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.52, 0.035), mat);
+      const postBack = new THREE.Mesh(new THREE.BoxGeometry(0.034, 0.52, 0.034), mat);
       postBack.position.set(side, 0.68, -0.18);
       postBack.rotation.x = -0.14;
       postBack.castShadow = true;
@@ -609,7 +757,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     }
 
     for (let i = 0; i < 5; i++) {
-      const slat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.02, 0.055), mat);
+      const slat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.02, 0.052), mat);
       slat.position.set(0, seatY, -0.14 + i * 0.07);
       slat.castShadow = true;
       slat.receiveShadow = true;
@@ -617,7 +765,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     }
 
     for (let i = 0; i < 4; i++) {
-      const slat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.045, 0.02), mat);
+      const slat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.044, 0.02), mat);
       slat.position.set(0, 0.62 + i * 0.075, -0.17 - i * 0.01);
       slat.rotation.x = -0.14;
       slat.castShadow = true;
@@ -627,7 +775,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     return chair;
   }
 
-  function createTerracottaPlanter(scale = 1.0): THREE.Group {
+  function createTerracottaPlanter(scale = 1.0, withJasmine = false): THREE.Group {
     const planter = new THREE.Group();
     const pot = new THREE.Mesh(
       new THREE.CylinderGeometry(0.32 * scale, 0.21 * scale, 0.48 * scale, 24),
@@ -647,81 +795,91 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     rim.castShadow = true;
     planter.add(rim);
 
-    const bush = createLemonCluster(0.44 * scale, 95, 0);
+    const bush = withJasmine
+      ? createJasmineIvyPatch(0.65 * scale, 0.55 * scale, 0.65 * scale, 95, 22)
+      : createLemonCluster(0.42 * scale, 105, 0);
     bush.position.y = 0.62 * scale;
     planter.add(bush);
 
     return planter;
   }
 
-  // Harbor Patio Furniture (exact composition for Chapters 02 & 04)
+  // Harbor Patio Furniture (exact full-view composition for Chapters 02 & 04 matching frame_004 & frame_008!)
   const leftBistro = createBistroTable();
-  leftBistro.position.set(-1.35, 0.75, -0.55);
+  leftBistro.position.set(-1.42, 0.74, 0.25);
   worldGroup.add(leftBistro);
 
   const mintChair1 = createCafeChair(mintChairMat);
-  mintChair1.position.set(-2.1, 0.75, -0.45);
-  mintChair1.rotation.y = 1.32;
+  mintChair1.position.set(-2.18, 0.74, 0.35);
+  mintChair1.rotation.y = 1.25;
   worldGroup.add(mintChair1);
 
   const mintChair2 = createCafeChair(mintChairMat);
-  mintChair2.position.set(-0.62, 0.75, -0.62);
-  mintChair2.rotation.y = -1.35;
+  mintChair2.position.set(-0.75, 0.74, 0.18);
+  mintChair2.rotation.y = -1.25;
   worldGroup.add(mintChair2);
 
   const rightBistro = createBistroTable();
-  rightBistro.position.set(1.52, 0.75, -0.42);
+  rightBistro.position.set(1.52, 0.74, 1.05);
   worldGroup.add(rightBistro);
 
   const teakChair = createCafeChair(teakWoodMat);
-  teakChair.position.set(0.88, 0.75, -0.22);
-  teakChair.rotation.y = 1.15;
+  teakChair.position.set(0.88, 0.74, 1.12);
+  teakChair.rotation.y = 1.08;
   worldGroup.add(teakChair);
 
-  const planterCenterLeft = createTerracottaPlanter(1.05);
-  planterCenterLeft.position.set(-0.22, 0.75, -0.55);
+  const planterCenterLeft = createTerracottaPlanter(1.02);
+  planterCenterLeft.position.set(-0.32, 0.74, 0.35);
   worldGroup.add(planterCenterLeft);
 
-  const planterCenterRight = createTerracottaPlanter(0.95);
-  planterCenterRight.position.set(0.28, 0.75, -0.15);
+  const planterCenterRight = createTerracottaPlanter(0.92);
+  planterCenterRight.position.set(0.22, 0.74, 1.12);
   worldGroup.add(planterCenterRight);
 
-  // Overarching Harbor Lemon Tree (trunk positioned at right edge x=1.78, z=0.65 so it frames right edge of Ch 02 & 04 without blocking camera!)
+  const planterRightDoor = createTerracottaPlanter(0.88, true);
+  planterRightDoor.position.set(1.52, 0.74, -0.85);
+  worldGroup.add(planterRightDoor);
+
+  // Overarching Harbor Lemon Tree (trunk positioned at right foreground so it frames the right edge & top border of Chapters 02 & 04 just like frames 04 & 08!)
   const harborTreeGroup = new THREE.Group();
-  harborTreeGroup.position.set(1.78, 0.75, 0.65);
+  harborTreeGroup.position.set(1.58, 0.74, 2.08);
   worldGroup.add(harborTreeGroup);
 
-  const mainTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.22, 2.75, 12), trunkMat);
-  mainTrunk.position.set(0.15, 1.3, 0);
-  mainTrunk.rotation.z = 0.22;
+  const mainTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.24, 2.55, 14), trunkMat);
+  mainTrunk.position.set(0.12, 1.15, 0);
+  mainTrunk.rotation.z = 0.28;
   mainTrunk.castShadow = true;
   harborTreeGroup.add(mainTrunk);
 
-  const branchL = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.13, 2.8, 10), trunkMat);
-  branchL.position.set(-0.85, 2.55, -0.35);
-  branchL.rotation.z = 0.96;
-  branchL.rotation.x = -0.18;
+  const branchL = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.13, 3.1, 10), trunkMat);
+  branchL.position.set(-0.95, 2.22, -0.25);
+  branchL.rotation.z = 1.12;
+  branchL.rotation.x = -0.12;
   branchL.castShadow = true;
   harborTreeGroup.add(branchL);
 
-  const lowCanopy1 = createLemonCluster(1.18, 145, 14);
-  lowCanopy1.position.set(-1.65, 2.85, -0.45);
+  const lowCanopy1 = createLemonCluster(0.98, 125, 14);
+  lowCanopy1.position.set(-2.45, 2.48, -0.55);
   harborTreeGroup.add(lowCanopy1);
 
-  const lowCanopy2 = createLemonCluster(1.12, 135, 12);
-  lowCanopy2.position.set(-0.25, 2.95, -0.25);
+  const lowCanopy2 = createLemonCluster(0.92, 115, 12);
+  lowCanopy2.position.set(-1.15, 2.55, -0.35);
   harborTreeGroup.add(lowCanopy2);
+
+  const lowCanopy3 = createLemonCluster(0.88, 105, 10);
+  lowCanopy3.position.set(-0.15, 2.42, -0.15);
+  harborTreeGroup.add(lowCanopy3);
 
   // Courtyard Lemon Canopy for Chapter 01 (frames the lower half of Chapter 01 while leaving the boat in the cove 100% clear!)
   const courtyardCanopyPositions: [number, number, number, number][] = [
-    [-1.65, 3.85, 1.85, 1.25],
-    [-0.25, 3.65, 2.05, 1.35],
-    [1.15, 3.85, 1.85, 1.25],
-    [-0.95, 4.15, 1.15, 1.15],
-    [0.65, 4.05, 1.15, 1.18],
+    [-1.75, 3.85, 1.65, 1.22],
+    [-0.25, 3.62, 1.95, 1.32],
+    [1.15, 3.82, 1.75, 1.22],
+    [-0.95, 4.08, 1.05, 1.12],
+    [0.65, 4.02, 1.05, 1.15],
   ];
   for (const [cx, cy, cz, cr] of courtyardCanopyPositions) {
-    const cluster = createLemonCluster(cr, 165, 16);
+    const cluster = createLemonCluster(cr, 155, 16);
     cluster.position.set(cx, cy, cz);
     worldGroup.add(cluster);
   }
@@ -730,7 +888,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   // 3. LINEN TERRACE (CHAPTER 03: BILLOWING PASTEL LINENS, OLIVE TREE, WICKER BASKET)
   // ============================================================================
   const linenTerraceGroup = new THREE.Group();
-  linenTerraceGroup.position.set(-12.2, 0.75, -1.2);
+  linenTerraceGroup.position.set(-12.2, 0.72, -1.2);
   worldGroup.add(linenTerraceGroup);
 
   const terraceSlab = new THREE.Mesh(new THREE.BoxGeometry(8.6, 1.2, 7.6), warmPlasterFloorMat);
@@ -739,29 +897,30 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   terraceSlab.castShadow = true;
   linenTerraceGroup.add(terraceSlab);
 
-  const parapetWall = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.82, 0.36), whiteWallMat);
-  parapetWall.position.set(0.15, 0.41, -1.95);
+  // Parapet wall sits at z = -1.78 so the clothesline at z = -0.55 casts crisp diagonal sheet shadows across the floor AND up onto the sunlit front face of the parapet wall (matching frame_005!)
+  const parapetWall = new THREE.Mesh(new THREE.BoxGeometry(5.6, 0.76, 0.34), whiteWallMat);
+  parapetWall.position.set(0.15, 0.38, -1.78);
   parapetWall.castShadow = true;
   parapetWall.receiveShadow = true;
   linenTerraceGroup.add(parapetWall);
 
-  const parapetCap = new THREE.Mesh(new THREE.BoxGeometry(5.72, 0.08, 0.44), whiteWallMat);
-  parapetCap.position.set(0.15, 0.84, -1.95);
+  const parapetCap = new THREE.Mesh(new THREE.BoxGeometry(5.72, 0.075, 0.42), whiteWallMat);
+  parapetCap.position.set(0.15, 0.78, -1.78);
   parapetCap.castShadow = true;
   parapetCap.receiveShadow = true;
   linenTerraceGroup.add(parapetCap);
 
-  const linenHouse = createCycladicHouse(3.6, 5.2, 6.2);
-  linenHouse.position.set(3.55, 0, -0.2);
+  const linenHouse = createCycladicHouse(3.6, 5.2, 5.6);
+  linenHouse.position.set(3.65, 0, -1.15);
   linenTerraceGroup.add(linenHouse);
 
   const linenHouseShutter = createShutteredWindow(0.95, 1.45, turquoiseShutterMat);
-  linenHouseShutter.position.set(1.73, 3.15, -1.65);
+  linenHouseShutter.position.set(1.83, 3.15, -1.85);
   linenHouseShutter.rotation.y = -Math.PI / 2;
   linenTerraceGroup.add(linenHouseShutter);
 
   const oliveTree = new THREE.Group();
-  oliveTree.position.set(-2.35, 0, -1.65);
+  oliveTree.position.set(-2.25, 0, -1.45);
   linenTerraceGroup.add(oliveTree);
 
   const oliveTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 2.35, 12), trunkMat);
@@ -770,18 +929,18 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   oliveTrunk.castShadow = true;
   oliveTree.add(oliveTrunk);
 
-  const oliveLeafGeo = new THREE.PlaneGeometry(0.055, 0.22);
+  const oliveLeafGeo = new THREE.PlaneGeometry(0.048, 0.2);
   for (let b = 0; b < 4; b++) {
     const bGroup = new THREE.Group();
     const angle = -0.5 + b * 0.45;
     bGroup.position.set(Math.sin(angle) * 0.5, 2.15 + (b % 2) * 0.35, Math.cos(angle) * 0.3);
 
-    const subBranch = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.08, 1.4, 8), trunkMat);
+    const subBranch = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.075, 1.45, 8), trunkMat);
     subBranch.rotation.z = (b - 1.5) * 0.45;
     subBranch.castShadow = true;
     bGroup.add(subBranch);
 
-    for (let i = 0; i < 185; i++) {
+    for (let i = 0; i < 195; i++) {
       const leaf = new THREE.Mesh(oliveLeafGeo, oliveLeafMat);
       leaf.position.set(
         (Math.random() - 0.5) * 2.1,
@@ -801,53 +960,53 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     oliveTree.add(bGroup);
   }
 
-  // Wooden Clothesline Posts, Rope, Clothespins, and 3 Sunlit Billowing Pastel Linen Sheets
-  const postGeo = new THREE.BoxGeometry(0.085, 2.45, 0.085);
+  // Wooden Clothesline Posts, Rope, Clothespins, and 3 Sunlit Billowing Pastel Linen Sheets at z = -0.55
+  const postGeo = new THREE.BoxGeometry(0.082, 2.38, 0.082);
   const postLeft = new THREE.Mesh(postGeo, warmPostWoodMat);
-  postLeft.position.set(-1.85, 1.22, -1.15);
+  postLeft.position.set(-1.85, 1.19, -0.45);
   postLeft.castShadow = true;
   postLeft.receiveShadow = true;
 
   const postRight = new THREE.Mesh(postGeo, warmPostWoodMat);
-  postRight.position.set(1.75, 1.36, -1.35);
+  postRight.position.set(1.72, 1.32, -0.65);
   postRight.castShadow = true;
   postRight.receiveShadow = true;
 
-  const ropeLen = Math.hypot(3.6, 0.14, -0.2);
+  const ropeLen = Math.hypot(3.57, 0.14, -0.2);
   const rope = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.012, 0.012, ropeLen, 8),
+    new THREE.CylinderGeometry(0.011, 0.011, ropeLen, 8),
     warmPostWoodMat,
   );
-  rope.position.set(-0.05, 2.36, -1.25);
+  rope.position.set(-0.06, 2.28, -0.55);
   rope.rotation.z = Math.PI / 2 - 0.042;
-  rope.rotation.y = -0.052;
+  rope.rotation.y = -0.056;
   rope.castShadow = true;
   linenTerraceGroup.add(postLeft, postRight, rope);
 
   const sheetSpecs = [
-    { x: -1.18, y: 2.31, z: -1.19, w: 0.98, h: 1.68, color: "#549692", phase: 0.0 },
-    { x: -0.02, y: 2.36, z: -1.25, w: 1.06, h: 1.82, color: "#D2E4E9", phase: 1.4 },
-    { x: 1.12, y: 2.41, z: -1.31, w: 0.96, h: 1.62, color: "#C2D7CC", phase: 2.7 },
+    { x: -1.18, y: 2.23, z: -0.49, w: 0.96, h: 1.64, color: "#4D8E8A", phase: 0.0 },
+    { x: -0.02, y: 2.28, z: -0.55, w: 1.06, h: 1.82, color: "#CFE0E5", phase: 1.4 },
+    { x: 1.12, y: 2.33, z: -0.61, w: 0.94, h: 1.62, color: "#B8CEC3", phase: 2.7 },
   ];
 
   const pinGeo = new THREE.BoxGeometry(0.032, 0.13, 0.038);
   for (const spec of sheetSpecs) {
-    const sheetGeo = new THREE.PlaneGeometry(spec.w, spec.h, 24, 32);
+    const sheetGeo = new THREE.PlaneGeometry(spec.w, spec.h, 36, 40);
     sheetGeo.translate(0, -spec.h / 2, 0);
 
     const sheetTex = createLinenWeaveTexture(spec.color);
     const sheetMat = new THREE.MeshStandardMaterial({
       map: sheetTex,
-      roughness: 0.76,
+      roughness: 0.74,
       metalness: 0.02,
       emissive: new THREE.Color(spec.color),
-      emissiveIntensity: 0.12,
+      emissiveIntensity: 0.08,
       side: THREE.DoubleSide,
     });
 
     const sheetMesh = new THREE.Mesh(sheetGeo, sheetMat);
     sheetMesh.position.set(spec.x, spec.y, spec.z);
-    sheetMesh.rotation.y = -0.052;
+    sheetMesh.rotation.y = -0.056;
     sheetMesh.castShadow = true;
     sheetMesh.receiveShadow = true;
     linenTerraceGroup.add(sheetMesh);
@@ -874,12 +1033,12 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
 
   // Right Foreground Stone Bench + Wicker Laundry Basket + Folded Linens + Glass Demijohn (visible in frame 05 bottom-right)
   const benchPlinth = new THREE.Mesh(new THREE.BoxGeometry(1.18, 0.42, 0.88), whiteWallMat);
-  benchPlinth.position.set(1.25, 0.21, 0.65);
+  benchPlinth.position.set(1.25, 0.21, 0.72);
   benchPlinth.castShadow = true;
   benchPlinth.receiveShadow = true;
 
   const benchSlab = new THREE.Mesh(new THREE.BoxGeometry(1.28, 0.07, 0.96), whiteWallMat);
-  benchSlab.position.set(1.25, 0.45, 0.65);
+  benchSlab.position.set(1.25, 0.45, 0.72);
   benchSlab.castShadow = true;
   benchSlab.receiveShadow = true;
   linenTerraceGroup.add(benchPlinth, benchSlab);
@@ -887,7 +1046,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   const wickerTex = createWickerTexture();
   const wickerMat = new THREE.MeshStandardMaterial({ map: wickerTex, roughness: 0.85 });
   const basket = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.24, 0.38, 24), wickerMat);
-  basket.position.set(1.38, 0.67, 0.62);
+  basket.position.set(1.38, 0.67, 0.68);
   basket.castShadow = true;
   basket.receiveShadow = true;
   linenTerraceGroup.add(basket);
@@ -895,11 +1054,11 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   const foldedMat1 = new THREE.MeshStandardMaterial({ color: 0x7cb0b4, roughness: 0.82 });
   const foldedMat2 = new THREE.MeshStandardMaterial({ color: 0xc2d6da, roughness: 0.82 });
   const towel1 = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.08, 0.32), foldedMat1);
-  towel1.position.set(1.38, 0.89, 0.62);
+  towel1.position.set(1.38, 0.89, 0.68);
   towel1.rotation.y = 0.18;
   towel1.castShadow = true;
   const towel2 = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.08, 0.28), foldedMat2);
-  towel2.position.set(1.4, 0.97, 0.61);
+  towel2.position.set(1.4, 0.97, 0.67);
   towel2.rotation.y = -0.12;
   towel2.castShadow = true;
   linenTerraceGroup.add(towel1, towel2);
@@ -912,56 +1071,110 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     transmission: 0.65,
     thickness: 0.3,
   });
-  const bottleBody = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.18, 0.38, 24), glassMat);
-  bottleBody.position.set(0.95, 0.67, 0.72);
+  const bottleBody = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.17, 0.36, 24), glassMat);
+  bottleBody.position.set(0.95, 0.66, 0.78);
   bottleBody.castShadow = true;
 
   const bottleShoulder = new THREE.Mesh(
-    new THREE.SphereGeometry(0.16, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.SphereGeometry(0.15, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2),
     glassMat,
   );
-  bottleShoulder.position.set(0.95, 0.86, 0.72);
+  bottleShoulder.position.set(0.95, 0.84, 0.78);
 
-  const bottleNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.16, 16), glassMat);
-  bottleNeck.position.set(0.95, 1.04, 0.72);
+  const bottleNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.052, 0.15, 16), glassMat);
+  bottleNeck.position.set(0.95, 1.01, 0.78);
 
-  const cork = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.032, 0.06, 12), warmPostWoodMat);
-  cork.position.set(0.95, 1.13, 0.72);
+  const cork = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.03, 0.055, 12), warmPostWoodMat);
+  cork.position.set(0.95, 1.1, 0.78);
   linenTerraceGroup.add(bottleBody, bottleShoulder, bottleNeck, cork);
 
   // ============================================================================
-  // 4. BOUGAINVILLEA LANE & ARCHWAY (CHAPTER 05: ARCH, STEPS, RAILING, VILLAGE)
+  // 4. BOUGAINVILLEA LANE & ARCHWAY (CHAPTER 05: ARCH, STEPS, RAILING, SEA VISTA)
   // ============================================================================
   const laneGroup = new THREE.Group();
-  laneGroup.position.set(-5.6, 0.75, 4.2);
+  laneGroup.position.set(-5.6, 0.72, 4.2);
   worldGroup.add(laneGroup);
 
   const slateTex = createSlateLaneTexture();
   const slateMat = new THREE.MeshStandardMaterial({
     map: slateTex,
+    roughness: 0.82,
+  });
+
+  const limestoneTileTex = createLimestoneTileTexture();
+  const limestoneTileMat = new THREE.MeshStandardMaterial({
+    map: limestoneTileTex,
     roughness: 0.84,
   });
-  const laneFloor = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.4, 9.6), slateMat);
-  laneFloor.position.set(0, -0.1, 2.15);
-  laneFloor.receiveShadow = true;
-  laneGroup.add(laneFloor);
+
+  // Shaded slate floor under and in front of the archway (z from -0.2 to +5.2)
+  const shadedLaneFloor = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.4, 5.4), slateMat);
+  shadedLaneFloor.position.set(0, -0.1, 2.5);
+  shadedLaneFloor.receiveShadow = true;
+  laneGroup.add(shadedLaneFloor);
+
+  // Sunlit cream limestone tile floor beyond the archway leading to the sea (z from -3.8 to -0.2, matching frame_009!)
+  const sunlitLaneFloor = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.38, 3.6), limestoneTileMat);
+  sunlitLaneFloor.position.set(0, -0.11, -2.0);
+  sunlitLaneFloor.receiveShadow = true;
+  laneGroup.add(sunlitLaneFloor);
+
+  // Dark stone seawall step at the end of the lane (z = -4.15, matching frame_009!)
+  const seawallStep = new THREE.Mesh(
+    new THREE.BoxGeometry(3.6, 0.36, 0.9),
+    new THREE.MeshStandardMaterial({ color: 0x2c3c44, roughness: 0.88 }),
+  );
+  seawallStep.position.set(0, -0.14, -4.25);
+  seawallStep.receiveShadow = true;
+  laneGroup.add(seawallStep);
+
+  // Left inner house wall beyond the archway with recessed turquoise shutter in perspective (matching frame_009!)
+  const innerArchHouse = createCycladicHouse(1.8, 3.85, 3.4);
+  innerArchHouse.position.set(-1.75, 0, -2.1);
+  laneGroup.add(innerArchHouse);
+
+  const innerArchShutter = createShutteredWindow(0.85, 1.38, turquoiseShutterMat);
+  innerArchShutter.position.set(-0.82, 1.85, -2.15);
+  innerArchShutter.rotation.y = Math.PI / 2;
+  laneGroup.add(innerArchShutter);
+
+  // Delicate olive branch peeking into the upper-right of the archway sea vista (matching frame_009!)
+  const archOliveBranch = new THREE.Group();
+  archOliveBranch.position.set(1.05, 2.28, -3.1);
+  const archTwig = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.032, 0.85, 6), trunkMat);
+  archTwig.position.set(-0.22, 0.05, 0);
+  archTwig.rotation.z = 1.18;
+  archOliveBranch.add(archTwig);
+  for (let i = 0; i < 65; i++) {
+    const leaf = new THREE.Mesh(pointedLeafGeo, oliveLeafMat);
+    leaf.position.set(
+      -Math.random() * 0.65,
+      (Math.random() - 0.5) * 0.42,
+      (Math.random() - 0.5) * 0.35,
+    );
+    leaf.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+    leaf.scale.setScalar(0.38 + Math.random() * 0.25);
+    archOliveBranch.add(leaf);
+  }
+  swayBranches.push(archOliveBranch);
+  laneGroup.add(archOliveBranch);
 
   const archWallShape = new THREE.Shape();
   archWallShape.moveTo(-2.2, 0);
   archWallShape.lineTo(2.2, 0);
-  archWallShape.lineTo(2.2, 3.65);
-  archWallShape.lineTo(-2.2, 3.65);
+  archWallShape.lineTo(2.2, 3.55);
+  archWallShape.lineTo(-2.2, 3.55);
   archWallShape.lineTo(-2.2, 0);
 
   const archHole = new THREE.Path();
   archHole.moveTo(-1.05, 0);
-  archHole.lineTo(-1.05, 1.85);
-  archHole.absarc(0, 1.85, 1.05, Math.PI, 0, true);
+  archHole.lineTo(-1.05, 1.82);
+  archHole.absarc(0, 1.82, 1.05, Math.PI, 0, true);
   archHole.lineTo(1.05, 0);
   archWallShape.holes.push(archHole);
 
   const archGeo = new THREE.ExtrudeGeometry(archWallShape, {
-    depth: 0.75,
+    depth: 0.78,
     bevelEnabled: true,
     bevelSegments: 3,
     steps: 1,
@@ -974,21 +1187,23 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   archMesh.receiveShadow = true;
   laneGroup.add(archMesh);
 
-  const archStemLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.07, 3.2, 8), trunkMat);
-  archStemLeft.position.set(-1.38, 1.45, 0.65);
-  archStemLeft.rotation.z = -0.18;
+  // Curving woody bougainvillea stem climbing the left wall through the stone shelves
+  const archStemLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.068, 3.3, 8), trunkMat);
+  archStemLeft.position.set(-1.35, 1.48, 1.15);
+  archStemLeft.rotation.z = -0.16;
+  archStemLeft.rotation.x = -0.18;
   archStemLeft.castShadow = true;
   laneGroup.add(archStemLeft);
 
-  const archGarlandTop = createBougainvilleaPatch(2.6, 0.85, 0.95, 520);
-  archGarlandTop.position.set(0.05, 3.18, 0.52);
+  const archGarlandTop = createBougainvilleaPatch(2.55, 0.82, 0.9, 440);
+  archGarlandTop.position.set(0.05, 3.12, 0.52);
   laneGroup.add(archGarlandTop);
 
-  const archGarlandLeft = createBougainvilleaPatch(0.85, 2.2, 0.85, 340);
-  archGarlandLeft.position.set(-1.42, 2.35, 0.58);
+  const archGarlandLeft = createBougainvilleaPatch(0.82, 2.25, 0.85, 310);
+  archGarlandLeft.position.set(-1.38, 2.35, 0.72);
   laneGroup.add(archGarlandLeft);
 
-  const archGarlandRight = createBougainvilleaPatch(0.85, 1.95, 0.85, 320);
+  const archGarlandRight = createBougainvilleaPatch(0.82, 1.95, 0.85, 290);
   archGarlandRight.position.set(1.22, 2.15, 0.52);
   laneGroup.add(archGarlandRight);
 
@@ -997,13 +1212,13 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   laneGroup.add(leftLaneWall);
 
   const laneShutter = createShutteredWindow(0.88, 1.42, turquoiseShutterMat);
-  laneShutter.position.set(-1.32, 1.75, 2.25);
+  laneShutter.position.set(-1.32, 1.65, 2.35);
   laneShutter.rotation.y = Math.PI / 2;
   laneGroup.add(laneShutter);
 
-  for (const shelfY of [1.05, 2.28]) {
-    const shelf = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.08, 0.95), whiteWallMat);
-    shelf.position.set(-1.18, shelfY, 1.75);
+  for (const shelfY of [0.95, 2.15]) {
+    const shelf = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.08, 0.95), whiteWallMat);
+    shelf.position.set(-1.18, shelfY, 1.85);
     shelf.castShadow = true;
     shelf.receiveShadow = true;
     laneGroup.add(shelf);
@@ -1012,12 +1227,12 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   const stairParapetShape = new THREE.Shape();
   stairParapetShape.moveTo(0, 0);
   stairParapetShape.lineTo(3.8, 0);
-  stairParapetShape.lineTo(3.8, 1.25);
-  stairParapetShape.lineTo(0, 3.15);
+  stairParapetShape.lineTo(3.8, 1.15);
+  stairParapetShape.lineTo(0, 3.05);
   stairParapetShape.lineTo(0, 0);
 
   const stairParapetGeo = new THREE.ExtrudeGeometry(stairParapetShape, {
-    depth: 0.34,
+    depth: 0.36,
     bevelEnabled: true,
     bevelSegments: 2,
     steps: 1,
@@ -1031,13 +1246,20 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   stairParapet.receiveShadow = true;
   laneGroup.add(stairParapet);
 
+  // Projected whitewashed upper landing slab on right (matching frame_009!)
+  const upperLandingSlab = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.14, 2.45), whiteWallMat);
+  upperLandingSlab.position.set(1.32, 2.48, 1.45);
+  upperLandingSlab.castShadow = true;
+  upperLandingSlab.receiveShadow = true;
+  laneGroup.add(upperLandingSlab);
+
   const railingGroup = new THREE.Group();
-  railingGroup.position.set(1.22, 2.55, 0.85);
-  const topBar = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 2.4), darkIronMat);
+  railingGroup.position.set(1.18, 2.55, 1.45);
+  const topBar = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.038, 2.4), darkIronMat);
   topBar.position.y = 0.85;
   railingGroup.add(topBar);
   for (let i = 0; i < 12; i++) {
-    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.014, 0.85, 8), darkIronMat);
+    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.85, 8), darkIronMat);
     bar.position.set(0, 0.42, -1.1 + i * 0.2);
     bar.castShadow = true;
     railingGroup.add(bar);
@@ -1048,14 +1270,14 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   // 5. UPPER CYCLADIC VILLAGE CLUSTER & REALISTIC GREEK ISLAND CLIFFS (FRAMES 11-16)
   // ============================================================================
   const villageSpecs: { x: number; y: number; z: number; w: number; h: number; d: number; hasDoor?: boolean }[] = [
-    { x: -11.2, y: 0.75, z: 7.2, w: 5.2, h: 4.9, d: 5.4, hasDoor: true },
-    { x: -5.4, y: 0.75, z: 13.8, w: 5.0, h: 5.3, d: 4.8, hasDoor: true },
-    { x: 0.6, y: 0.75, z: 8.8, w: 5.4, h: 4.8, d: 5.2, hasDoor: true },
-    { x: 6.2, y: 0.75, z: 7.5, w: 4.8, h: 4.6, d: 5.0 },
-    { x: -15.8, y: 0.75, z: 12.4, w: 4.8, h: 4.5, d: 4.8 },
-    { x: -10.5, y: 0.75, z: 15.2, w: 5.2, h: 5.4, d: 5.0 },
-    { x: 1.2, y: 0.75, z: 15.6, w: 5.0, h: 5.2, d: 4.8 },
-    { x: 7.2, y: 0.75, z: 14.5, w: 4.6, h: 4.9, d: 4.8 },
+    { x: -11.2, y: 0.72, z: 7.2, w: 5.2, h: 4.9, d: 5.4, hasDoor: true },
+    { x: -5.4, y: 0.72, z: 13.8, w: 5.0, h: 5.3, d: 4.8, hasDoor: true },
+    { x: 0.6, y: 0.72, z: 8.8, w: 5.4, h: 4.8, d: 5.2, hasDoor: true },
+    { x: 6.2, y: 0.72, z: 7.5, w: 4.8, h: 4.6, d: 5.0 },
+    { x: -15.8, y: 0.72, z: 12.4, w: 4.8, h: 4.5, d: 4.8 },
+    { x: -10.5, y: 0.72, z: 15.2, w: 5.2, h: 5.4, d: 5.0 },
+    { x: 1.2, y: 0.72, z: 15.6, w: 5.0, h: 5.2, d: 4.8 },
+    { x: 7.2, y: 0.72, z: 14.5, w: 4.6, h: 4.9, d: 4.8 },
   ];
 
   for (const v of villageSpecs) {
@@ -1097,11 +1319,11 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   for (let i = 0; i < cPos.count; i++) {
     const x = cPos.getX(i);
     const z = cPos.getZ(i);
-    const hillSlope = Math.max(0, (z + 25) * 0.14);
+    const hillSlope = Math.max(0, (z + 25) * 0.12);
     const ridge =
-      Math.sin(x * 0.065) * 2.2 +
-      Math.cos(z * 0.09 + x * 0.04) * 1.4 +
-      Math.sin(x * 0.22 - z * 0.18) * 0.45;
+      Math.sin(x * 0.065) * 1.9 +
+      Math.cos(z * 0.09 + x * 0.04) * 1.2 +
+      Math.sin(x * 0.22 - z * 0.18) * 0.35;
     cPos.setY(i, hillSlope + ridge);
   }
   cliffGeo.computeVertexNormals();
@@ -1118,9 +1340,9 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   cliffMesh.receiveShadow = true;
   worldGroup.add(cliffMesh);
 
-  // Rocky limestone seawall foundation strictly behind z = -3.4 so the harbor cove water is 100% unobstructed!
+  // Rocky limestone seawall foundation
   const seawallMat = new THREE.MeshStandardMaterial({
-    color: 0x948b7a,
+    color: 0x847c6c,
     map: cobbleTex.map,
     roughness: 0.92,
   });
@@ -1133,34 +1355,34 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   // Distant Aegean Island Silhouette on the Northern Horizon
   const islandShape = new THREE.Shape();
   islandShape.moveTo(-42, 0);
-  islandShape.quadraticCurveTo(-24, 1.8, -12, 5.2);
-  islandShape.quadraticCurveTo(-4, 7.6, 4, 4.8);
-  islandShape.quadraticCurveTo(18, 2.1, 38, 0);
+  islandShape.quadraticCurveTo(-24, 1.8, -12, 4.8);
+  islandShape.quadraticCurveTo(-4, 6.8, 4, 4.2);
+  islandShape.quadraticCurveTo(18, 1.9, 38, 0);
   islandShape.lineTo(-42, 0);
 
   const islandGeo = new THREE.ExtrudeGeometry(islandShape, {
-    depth: 12,
+    depth: 10,
     bevelEnabled: true,
-    bevelSize: 1.2,
-    bevelThickness: 1.5,
+    bevelSize: 1.0,
+    bevelThickness: 1.2,
   });
   const islandMat = new THREE.MeshStandardMaterial({
     color: 0x5c859c,
     roughness: 0.95,
   });
   const distantIsland = new THREE.Mesh(islandGeo, islandMat);
-  distantIsland.position.set(-34, -0.5, -145);
+  distantIsland.position.set(-14, -0.5, -145);
   worldGroup.add(distantIsland);
 
   return {
     update: (elapsed: number, breeze: number) => {
       const waveAmp = 0.55 + breeze * 0.65;
-      boatGroup.position.y = 0.14 + Math.sin(elapsed * 1.65) * 0.035 * waveAmp;
-      boatGroup.rotation.z = Math.sin(elapsed * 1.35 + 0.5) * 0.028 * waveAmp;
-      boatGroup.rotation.x = Math.cos(elapsed * 1.15) * 0.018 * waveAmp;
+      boatGroup.position.y = 0.1 + Math.sin(elapsed * 1.65) * 0.03 * waveAmp;
+      boatGroup.rotation.z = Math.sin(elapsed * 1.35 + 0.5) * 0.024 * waveAmp;
+      boatGroup.rotation.x = Math.cos(elapsed * 1.15) * 0.016 * waveAmp;
 
-      const windStrength = 0.14 + breeze * 0.28;
-      const windSpeed = 1.8 + breeze * 1.6;
+      const windStrength = 0.11 + breeze * 0.22;
+      const windSpeed = 1.7 + breeze * 1.5;
       for (const sheet of clothSheets) {
         const pos = sheet.mesh.geometry.attributes.position as THREE.BufferAttribute;
         const base = sheet.basePositions;
@@ -1172,14 +1394,21 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
           const bz = base[i * 3 + 2];
 
           const vNorm = Math.min(1, Math.max(0, -by / sheet.height));
-          const pinMask = Math.pow(vNorm, 1.35);
+          const pinMask = Math.pow(vNorm, 1.15);
+          const pleatMask = Math.pow(vNorm, 0.55);
 
-          const wave1 = Math.sin(bx * 3.4 - by * 2.6 - elapsed * windSpeed + sheet.phaseOffset);
-          const wave2 = Math.cos(bx * 5.8 + by * 3.9 - elapsed * (windSpeed * 1.35) + sheet.phaseOffset) * 0.42;
-          const billow = Math.sin(vNorm * Math.PI) * (0.12 + 0.08 * Math.sin(elapsed * 1.1 + sheet.phaseOffset));
+          // Deep vertical drapery pleats that catch grazing sunlight (matching frame_005!)
+          const pleat =
+            (Math.sin(bx * 15.5 + sheet.phaseOffset) * 0.068 +
+              Math.cos(bx * 27.0 - sheet.phaseOffset * 0.7) * 0.032) *
+            pleatMask;
 
-          const dz = ((wave1 + wave2) * windStrength + billow) * pinMask;
-          const dx = Math.sin(by * 2.5 - elapsed * 1.4 + sheet.phaseOffset) * 0.045 * pinMask * breeze;
+          const wave1 = Math.sin(bx * 3.2 - by * 2.4 - elapsed * windSpeed + sheet.phaseOffset);
+          const wave2 = Math.cos(bx * 5.4 + by * 3.6 - elapsed * (windSpeed * 1.3) + sheet.phaseOffset) * 0.38;
+          const billow = Math.sin(vNorm * Math.PI) * (0.14 + 0.07 * Math.sin(elapsed * 1.1 + sheet.phaseOffset));
+
+          const dz = pleat + ((wave1 + wave2) * windStrength + billow) * pinMask;
+          const dx = Math.sin(by * 2.5 - elapsed * 1.4 + sheet.phaseOffset) * 0.04 * pinMask * breeze;
 
           pos.setXYZ(i, bx + dx, by, bz + dz);
         }
@@ -1190,8 +1419,8 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
       for (let i = 0; i < swayBranches.length; i++) {
         const b = swayBranches[i];
         const phase = i * 0.73;
-        b.rotation.z = Math.sin(elapsed * 1.4 + phase) * 0.025 * (0.5 + breeze);
-        b.rotation.x = Math.cos(elapsed * 1.1 + phase) * 0.018 * (0.5 + breeze);
+        b.rotation.z = Math.sin(elapsed * 1.4 + phase) * 0.022 * (0.5 + breeze);
+        b.rotation.x = Math.cos(elapsed * 1.1 + phase) * 0.016 * (0.5 + breeze);
       }
     },
   };
