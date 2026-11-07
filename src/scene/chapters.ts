@@ -18,8 +18,8 @@ export const CHAPTERS: ChapterSpec[] = [
     kicker: "01 / UNDER THE LEMON TREE",
     titleLines: ["A little closer", "to the sea."],
     subtitle: "Salt in the air. Sun on the stone.",
-    cameraPos: [0.0, 6.2, 5.0],
-    lookAt: [0.0, 1.1, -7.0],
+    cameraPos: [0.0, 8.2, 0.5],
+    lookAt: [0.12, 0.8, -6.5],
     fov: 42,
   },
   {

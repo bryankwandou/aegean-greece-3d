@@ -390,24 +390,42 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   ): THREE.Group {
     const patch = new THREE.Group();
 
+    // Woody climbing vine stems
+    const vineCount = Math.max(2, Math.floor(density / 120));
+    for (let v = 0; v < vineCount; v++) {
+      const vx = (Math.random() - 0.5) * (width * 0.4);
+      const vz = (Math.random() - 0.5) * (depth * 0.4);
+      const vineCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(vx, -height * 0.5, vz),
+        new THREE.Vector3(vx + (Math.random() - 0.5) * 0.15, 0, vz + (Math.random() - 0.5) * 0.15),
+        new THREE.Vector3(vx + (Math.random() - 0.5) * 0.15, height * 0.5, vz + (Math.random() - 0.5) * 0.15),
+      ]);
+      const vineMesh = new THREE.Mesh(
+        new THREE.TubeGeometry(vineCurve, 14, 0.022, 6, false),
+        trunkMat,
+      );
+      vineMesh.castShadow = true;
+      patch.add(vineMesh);
+    }
+
     for (let i = 0; i < density; i++) {
       const x = (Math.random() - 0.5) * width;
       const y = (Math.random() - 0.5) * height;
       const z = (Math.random() - 0.5) * depth;
 
-      const isFlower = Math.random() < 0.66;
+      const isFlower = Math.random() < 0.72;
       if (isFlower) {
-        const mat = Math.random() > 0.42 ? bougainvilleaPetalMat : bougainvilleaAccentMat;
-        // 3-bract pointed magenta paper-flower cluster
-        for (let b = 0; b < 3; b++) {
+        const mat = Math.random() > 0.38 ? bougainvilleaPetalMat : bougainvilleaAccentMat;
+        // 4-bract clustered magenta paper-flower rosette with rich presence
+        for (let b = 0; b < 4; b++) {
           const bract = new THREE.Mesh(bractGeo, mat);
-          bract.position.set(x + (b - 1) * 0.018, y + (b % 2) * 0.012, z);
+          bract.position.set(x + (b - 1.5) * 0.024, y + (b % 2) * 0.016, z);
           bract.rotation.set(
             Math.random() * Math.PI,
             Math.random() * Math.PI,
             Math.random() * Math.PI,
           );
-          bract.scale.setScalar(1.22 + Math.random() * 0.68);
+          bract.scale.setScalar(2.2 + Math.random() * 0.95);
           bract.castShadow = true;
           patch.add(bract);
         }
@@ -419,7 +437,7 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
           Math.random() * Math.PI,
           Math.random() * Math.PI,
         );
-        leaf.scale.setScalar(0.45 + Math.random() * 0.35);
+        leaf.scale.setScalar(0.72 + Math.random() * 0.45);
         leaf.castShadow = true;
         patch.add(leaf);
       }
@@ -476,30 +494,35 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   // 1. TRADITIONAL GREEK WOODEN BOAT (#86) IN THE CRYSTAL COVE
   // ============================================================================
   const boatGroup = new THREE.Group();
-  boatGroup.position.set(0.38, 0.1, -8.15);
-  boatGroup.rotation.y = -0.36;
+  boatGroup.position.set(1.05, 0.08, -8.15);
+  boatGroup.rotation.y = -0.38;
   worldGroup.add(boatGroup);
 
-  const hullLength = 3.35;
-  const hullWidth = 1.16;
+  const hullLength = 2.45;
+  const hullWidth = 0.92;
   const hullShape = new THREE.Shape();
   hullShape.moveTo(-hullLength * 0.5, 0);
-  hullShape.quadraticCurveTo(-hullLength * 0.15, hullWidth * 0.56, hullLength * 0.35, hullWidth * 0.48);
-  hullShape.lineTo(hullLength * 0.5, 0);
-  hullShape.lineTo(hullLength * 0.35, -hullWidth * 0.48);
-  hullShape.quadraticCurveTo(-hullLength * 0.15, -hullWidth * 0.56, -hullLength * 0.5, 0);
+  hullShape.quadraticCurveTo(-hullLength * 0.18, hullWidth * 0.54, hullLength * 0.32, hullWidth * 0.46);
+  hullShape.lineTo(hullLength * 0.5, hullWidth * 0.3);
+  hullShape.lineTo(hullLength * 0.5, -hullWidth * 0.3);
+  hullShape.lineTo(hullLength * 0.32, -hullWidth * 0.46);
+  hullShape.quadraticCurveTo(-hullLength * 0.18, -hullWidth * 0.54, -hullLength * 0.5, 0);
 
   const hullExtrude = new THREE.ExtrudeGeometry(hullShape, {
-    depth: 0.46,
+    depth: 0.42,
     bevelEnabled: true,
-    bevelSegments: 3,
+    bevelSegments: 4,
     steps: 1,
-    bevelSize: 0.055,
-    bevelThickness: 0.055,
+    bevelSize: 0.05,
+    bevelThickness: 0.05,
   });
   hullExtrude.rotateX(-Math.PI / 2);
 
-  const boatHullMat = new THREE.MeshStandardMaterial({ color: 0xf7f6f1, roughness: 0.48 });
+  const boatHullMat = new THREE.MeshStandardMaterial({
+    color: 0xfcfbfa,
+    roughness: 0.28,
+    metalness: 0.04,
+  });
   const hullMesh = new THREE.Mesh(hullExtrude, boatHullMat);
   hullMesh.position.y = -0.06;
   hullMesh.castShadow = true;
@@ -508,106 +531,114 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
 
   // Registration badge "86" on starboard/port bow (visible in frame_001 & frame_008)
   const bowBadgeTex = createBoatBowNumberTexture();
-  const bowBadgeMat = new THREE.MeshStandardMaterial({ map: bowBadgeTex, roughness: 0.5 });
+  const bowBadgeMat = new THREE.MeshStandardMaterial({ map: bowBadgeTex, roughness: 0.45 });
   for (const side of [-1, 1]) {
-    const badge = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.14), bowBadgeMat);
-    badge.position.set(-0.88, 0.25, side * (hullWidth * 0.46));
-    badge.rotation.y = side > 0 ? 0.18 : Math.PI - 0.18;
+    const badge = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.12), bowBadgeMat);
+    badge.position.set(-0.72, 0.22, side * (hullWidth * 0.46));
+    badge.rotation.y = side > 0 ? 0.2 : Math.PI - 0.2;
     boatGroup.add(badge);
   }
 
-  const gunwaleMat = new THREE.MeshStandardMaterial({ color: 0x6e281e, roughness: 0.48 });
-  const boatTealMat = new THREE.MeshStandardMaterial({ color: 0x267470, roughness: 0.56 });
+  const gunwaleMat = new THREE.MeshStandardMaterial({ color: 0x7a2016, roughness: 0.45 });
+  const boatTealMat = new THREE.MeshStandardMaterial({ color: 0x24c2b4, roughness: 0.42 });
+  const teakPlankMat = new THREE.MeshStandardMaterial({ color: 0x5e4128, roughness: 0.74 });
 
   const deckMesh = new THREE.Mesh(
-    new THREE.BoxGeometry(hullLength * 0.78, 0.04, hullWidth * 0.74),
-    new THREE.MeshStandardMaterial({ color: 0x4a3828, roughness: 0.82 }),
+    new THREE.BoxGeometry(hullLength * 0.82, 0.035, hullWidth * 0.76),
+    teakPlankMat,
   );
-  deckMesh.position.set(-0.04, 0.24, 0);
+  deckMesh.position.set(-0.03, 0.18, 0);
   deckMesh.receiveShadow = true;
   boatGroup.add(deckMesh);
 
   for (const side of [-1, 1]) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(hullLength * 0.86, 0.065, 0.065), gunwaleMat);
-    rail.position.set(-0.04, 0.43, side * (hullWidth * 0.43));
+    const rail = new THREE.Mesh(new THREE.BoxGeometry(hullLength * 0.88, 0.055, 0.055), gunwaleMat);
+    rail.position.set(-0.03, 0.38, side * (hullWidth * 0.44));
     rail.castShadow = true;
     boatGroup.add(rail);
 
-    const stripe = new THREE.Mesh(new THREE.BoxGeometry(hullLength * 0.82, 0.024, 0.02), boatTealMat);
-    stripe.position.set(-0.04, 0.16, side * (hullWidth * 0.48));
+    const stripe = new THREE.Mesh(new THREE.BoxGeometry(hullLength * 0.84, 0.022, 0.018), gunwaleMat);
+    stripe.position.set(-0.03, 0.14, side * (hullWidth * 0.485));
     boatGroup.add(stripe);
   }
 
   // Interior wooden ribs & teal thwarts (benches) visible from Chapter 01
-  for (const rx of [-0.95, -0.45, 0.05, 0.55, 0.95]) {
-    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.16, hullWidth * 0.78), teakWoodMat);
-    rib.position.set(rx, 0.34, 0);
+  for (const rx of [-0.75, -0.38, 0.05, 0.45, 0.82]) {
+    const rib = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.15, hullWidth * 0.78), teakPlankMat);
+    rib.position.set(rx, 0.28, 0);
     boatGroup.add(rib);
   }
 
-  for (const bx of [-0.68, 0.05, 0.68]) {
-    const bench = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.045, hullWidth * 0.78), boatTealMat);
-    bench.position.set(bx, 0.37, 0);
-    bench.castShadow = true;
-    boatGroup.add(bench);
+  for (const bx of [-0.85, -0.42, 0.02, 0.45]) {
+    const benchGroup = new THREE.Group();
+    benchGroup.position.set(bx, 0.3, 0);
+    const benchWood = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.035, hullWidth * 0.78), teakPlankMat);
+    const benchCushion = new THREE.Mesh(new THREE.BoxGeometry(0.21, 0.03, hullWidth * 0.72), boatTealMat);
+    benchCushion.position.y = 0.03;
+    benchCushion.castShadow = true;
+    benchGroup.add(benchWood, benchCushion);
+    boatGroup.add(benchGroup);
   }
 
   // Coiled bow rope
   const ropeCoil = new THREE.Mesh(
-    new THREE.TorusGeometry(0.11, 0.028, 8, 18),
+    new THREE.TorusGeometry(0.1, 0.028, 8, 18),
     warmPostWoodMat,
   );
   ropeCoil.rotation.x = Math.PI / 2;
-  ropeCoil.position.set(-1.18, 0.38, 0);
+  ropeCoil.position.set(-0.95, 0.34, 0);
   boatGroup.add(ropeCoil);
 
   // Traditional wooden rudder and tiller arm at stern
   const rudderBlade = new THREE.Mesh(
-    new THREE.BoxGeometry(0.18, 0.45, 0.035),
-    teakWoodMat,
+    new THREE.BoxGeometry(0.16, 0.42, 0.032),
+    teakPlankMat,
   );
-  rudderBlade.position.set(1.68, 0.08, 0);
+  rudderBlade.position.set(1.35, 0.08, 0);
   rudderBlade.rotation.z = -0.18;
   rudderBlade.castShadow = true;
   boatGroup.add(rudderBlade);
 
   const tillerArm = new THREE.Mesh(
-    new THREE.BoxGeometry(0.42, 0.035, 0.035),
+    new THREE.BoxGeometry(0.36, 0.032, 0.032),
     warmPostWoodMat,
   );
-  tillerArm.position.set(1.42, 0.44, 0);
+  tillerArm.position.set(1.15, 0.38, 0);
   tillerArm.rotation.z = 0.08;
   tillerArm.castShadow = true;
   boatGroup.add(tillerArm);
 
-  // Slender 4-pole frame + off-white bimini sun canopy (proportional height matching frames 01, 04, 08)
-  const poleGeo = new THREE.CylinderGeometry(0.014, 0.014, 0.88, 8);
-  for (const px of [-0.66, 0.66]) {
-    for (const pz of [-0.38, 0.38]) {
+  // Slender 4-pole frame + pristine sunlit white bimini sun canopy (matching frame_001!)
+  const poleGeo = new THREE.CylinderGeometry(0.012, 0.012, 0.78, 8);
+  for (const px of [0.05, 0.85]) {
+    for (const pz of [-0.34, 0.34]) {
       const pole = new THREE.Mesh(poleGeo, darkIronMat);
-      pole.position.set(px, 0.82, pz);
+      pole.position.set(px, 0.72, pz);
       pole.castShadow = true;
       boatGroup.add(pole);
     }
   }
 
-  const canopyGeo = new THREE.PlaneGeometry(1.56, 0.96, 14, 10);
+  const canopyGeo = new THREE.PlaneGeometry(1.05, 0.82, 16, 12);
   canopyGeo.rotateX(-Math.PI / 2);
   const canopyPos = canopyGeo.attributes.position;
   for (let i = 0; i < canopyPos.count; i++) {
     const cx = canopyPos.getX(i);
     const cz = canopyPos.getZ(i);
-    const arch = Math.cos(cz * 2.2) * 0.065 - Math.abs(cx) * 0.02;
+    const arch = Math.cos(cz * 2.6) * 0.065 - Math.abs(cx) * 0.018;
     canopyPos.setY(i, arch);
   }
   canopyGeo.computeVertexNormals();
   const canopyMat = new THREE.MeshStandardMaterial({
-    color: 0xf6f4ec,
-    roughness: 0.72,
+    color: 0xffffff,
+    emissive: 0xffffff,
+    emissiveIntensity: 0.38,
+    roughness: 0.3,
     side: THREE.DoubleSide,
   });
   const canopyMesh = new THREE.Mesh(canopyGeo, canopyMat);
-  canopyMesh.position.set(0, 1.25, 0);
+  canopyMesh.position.set(0.45, 1.12, 0);
+  canopyMesh.rotation.z = -0.12;
   canopyMesh.castShadow = true;
   canopyMesh.receiveShadow = true;
   boatGroup.add(canopyMesh);
@@ -720,11 +751,11 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
 
   // 15 Terracotta pergola slats across the inner roof edge of Left House (matching Chapter 01 frame_001!)
   const slatGroup = new THREE.Group();
-  slatGroup.position.set(-2.25, 5.73, -2.22);
+  slatGroup.position.set(-2.25, 5.58, -2.1);
   for (let i = 0; i < 15; i++) {
-    const slat = new THREE.Mesh(new THREE.BoxGeometry(0.068, 0.038, 0.78), terracottaMat);
+    const slat = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.045, 0.95), terracottaMat);
     slat.position.set(-1.35 + i * 0.195, 0, 0);
-    slat.rotation.y = 0.22;
+    slat.rotation.y = 0;
     slat.castShadow = true;
     slat.receiveShadow = true;
     slatGroup.add(slat);
@@ -732,8 +763,8 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   worldGroup.add(slatGroup);
 
   // Bougainvillea vine climbing the front-right corner of Left House (visible in Chapter 01 frame_001 & Chapter 04 frame_008!)
-  const leftHouseCornerVine = createBougainvilleaPatch(0.55, 2.65, 0.65, 210);
-  leftHouseCornerVine.position.set(-0.56, 3.85, -3.45);
+  const leftHouseCornerVine = createBougainvilleaPatch(0.72, 3.85, 0.95, 380);
+  leftHouseCornerVine.position.set(-0.56, 3.45, -3.25);
   worldGroup.add(leftHouseCornerVine);
 
   // Iconic Pastel Turquoise Louvered Shutters on South/Patio-Facing Wall of Left House
@@ -759,12 +790,12 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   rightHouse.position.set(4.35, 0.72, -2.65);
   worldGroup.add(rightHouse);
 
-  const rightHouseBougainvilleaTop = createBougainvilleaPatch(1.25, 2.4, 1.25, 320);
-  rightHouseBougainvilleaTop.position.set(1.88, 4.55, -1.55);
+  const rightHouseBougainvilleaTop = createBougainvilleaPatch(1.4, 2.9, 1.4, 450);
+  rightHouseBougainvilleaTop.position.set(1.92, 4.35, -1.55);
   worldGroup.add(rightHouseBougainvilleaTop);
 
-  const rightHouseBougainvilleaLow = createBougainvilleaPatch(1.35, 1.95, 1.25, 280);
-  rightHouseBougainvilleaLow.position.set(2.15, 2.85, 0.35);
+  const rightHouseBougainvilleaLow = createBougainvilleaPatch(1.45, 2.45, 1.35, 380);
+  rightHouseBougainvilleaLow.position.set(2.12, 2.55, 0.25);
   worldGroup.add(rightHouseBougainvilleaLow);
 
   // Weathered Teal Door with Green Climbing Ivy & White Star-Jasmine Flowers on Right House (matching frame_004!)
@@ -998,29 +1029,30 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   harborTreeGroup.add(cam2OverheadCluster2);
 
   // Courtyard Lemon Canopy for Chapter 01 (cinematic lower-third framing matching DACI75PglF1j3tK9k.mp4 frame_001!)
-  const courtyardCanopyPositions: [number, number, number, number][] = [
+  const courtyardCanopyPositions: [number, number, number, number, number][] = [
+    // [cx, cy, cz, radius, lemonCount]
     // Bottom-left foreground framing (sloping up toward Left House)
-    [-1.65, 4.85, 2.85, 0.95],
-    [-1.15, 4.55, 2.75, 0.88],
-    [-0.65, 4.25, 2.65, 0.82],
+    [-1.65, 5.65, -0.95, 0.88, 2],
+    [-1.15, 5.25, -1.05, 0.82, 2],
+    [-0.65, 4.85, -1.15, 0.76, 1],
 
     // Bottom-center low foreground (keeps boat #86 and turquoise cove 100% visible and unblocked!)
-    [-0.15, 3.92, 2.45, 0.78],
-    [0.18, 3.88, 2.45, 0.78],
+    [-0.15, 4.15, -1.25, 0.68, 0],
+    [0.18, 4.12, -1.25, 0.68, 1],
 
     // Bottom-right foreground framing (sloping up toward Right House)
-    [0.68, 4.25, 2.65, 0.82],
-    [1.18, 4.55, 2.75, 0.88],
-    [1.65, 4.85, 2.85, 0.95],
+    [0.68, 4.85, -1.15, 0.76, 2],
+    [1.18, 5.25, -1.05, 0.82, 2],
+    [1.65, 5.65, -0.95, 0.88, 2],
 
-    // Courtyard midground foliage under the courtyard terrace
-    [-1.45, 3.85, 1.65, 1.05],
-    [1.35, 3.85, 1.65, 1.05],
-    [-0.55, 3.45, 1.25, 0.95],
-    [0.55, 3.45, 1.25, 0.95],
+    // Courtyard midground foliage
+    [-1.45, 4.25, -1.85, 0.95, 1],
+    [1.35, 4.25, -1.85, 0.95, 1],
+    [-0.55, 3.85, -2.25, 0.85, 0],
+    [0.55, 3.85, -2.25, 0.85, 0],
   ];
-  for (const [cx, cy, cz, cr] of courtyardCanopyPositions) {
-    const cluster = createLemonCluster(cr, 155, 16);
+  for (const [cx, cy, cz, cr, cl] of courtyardCanopyPositions) {
+    const cluster = createLemonCluster(cr, 135, cl);
     cluster.position.set(cx, cy, cz);
     worldGroup.add(cluster);
   }

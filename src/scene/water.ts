@@ -15,21 +15,22 @@ export function createAegeanWater(): WaterHandles {
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i);
     const z = pos.getZ(i);
-    // Cove shelf around z = -1 to -12, then gently slopes down
+    // Shallow cove shelf around z = -1 to -9 at depth ~ -0.7m, then gently slopes down
     const dist = Math.max(0, -z);
-    const depth = -0.55 - Math.pow(dist * 0.08, 1.25) * 3.8;
-    const ripple = Math.sin(x * 0.8 + z * 0.6) * 0.12 + Math.cos(x * 1.8 - z * 1.4) * 0.06;
+    const depth = -0.68 - Math.pow(dist * 0.075, 1.3) * 3.6;
+    const ripple = Math.sin(x * 0.75 + z * 0.55) * 0.08 + Math.cos(x * 1.6 - z * 1.3) * 0.05;
     pos.setY(i, depth + ripple);
   }
   seabedGeo.computeVertexNormals();
 
   const seabedMat = new THREE.MeshStandardMaterial({
-    color: 0xdfd7ba,
-    roughness: 0.92,
+    color: 0xdfd4b8,
+    roughness: 0.88,
     metalness: 0.02,
   });
   const seabedMesh = new THREE.Mesh(seabedGeo, seabedMat);
   seabedMesh.receiveShadow = true;
+  seabedMesh.renderOrder = 0;
 
   // 2. High-Fidelity Photorealistic Water Surface Shader (matching DACI75PglF1j3tK9k.mp4)
   const waterGeo = new THREE.PlaneGeometry(360, 360, 240, 240);
@@ -38,18 +39,18 @@ export function createAegeanWater(): WaterHandles {
   const uniforms = {
     uTime: { value: 0 },
     uBreeze: { value: 0.48 },
-    uClarity: { value: 0.94 },
-    uSunDir: { value: new THREE.Vector3(0.42, 0.76, 0.48).normalize() },
-    uShallowTurquoise: { value: new THREE.Color(0x38d9cb) },
-    uMidTeal: { value: new THREE.Color(0x18929e) },
-    uDeepSapphire: { value: new THREE.Color(0x0e5874) },
-    uSkyReflect: { value: new THREE.Color(0x7fb8e2) },
+    uClarity: { value: 0.96 },
+    uSunDir: { value: new THREE.Vector3(0.52, 0.78, 0.35).normalize() },
+    uShallowTurquoise: { value: new THREE.Color(0x00e6d2) },
+    uMidTeal: { value: new THREE.Color(0x009bb3) },
+    uDeepSapphire: { value: new THREE.Color(0x045c7e) },
+    uSkyReflect: { value: new THREE.Color(0x8ad2f0) },
   };
 
   const waterMat = new THREE.ShaderMaterial({
     uniforms,
     transparent: true,
-    depthWrite: true,
+    depthWrite: false,
     vertexShader: /* glsl */ `
       uniform float uTime;
       uniform float uBreeze;
@@ -178,24 +179,24 @@ export function createAegeanWater(): WaterHandles {
         float r2 = smoothNoise(rUV * 2.2 + 3.1) - 0.5;
         vec3 N = normalize(vNormal + vec3((r1 + r2 * 0.5) * 0.12, 0.0, (r1 * 1.2 - r2 * 0.6) * 0.18));
 
-        // Depth/distance from the coastal edge (z around 0.0 to -1.0)
-        float shoreFactor = clamp((-vWorldPos.z) / 18.0, 0.0, 1.0);
-        float shallowGrad = 1.0 - smoothstep(0.0, 0.45, shoreFactor);
+        // Depth/distance from the coastal edge (entire cove is crystal turquoise shallows)
+        float shoreFactor = clamp((-vWorldPos.z) / 55.0, 0.0, 1.0);
+        float shallowGrad = 1.0 - smoothstep(0.0, 0.58, shoreFactor);
 
         // Dancing sunlight caustics on shallow seabed
         float caustics = organicCaustics(vWorldPos.xz, uTime) * uClarity;
 
         // Submerged seabed pebble tone visible through clear shallows
         float pebble = smoothNoise(vWorldPos.xz * 6.0) * 0.5 + smoothNoise(vWorldPos.xz * 14.0) * 0.5;
-        vec3 pebbleCol = mix(vec3(0.82, 0.78, 0.65), vec3(0.55, 0.68, 0.62), pebble);
+        vec3 pebbleCol = mix(vec3(0.85, 0.82, 0.70), vec3(0.60, 0.74, 0.68), pebble);
 
-        // Composite water depth color gradient
-        vec3 col = mix(uDeepSapphire, uMidTeal, 1.0 - smoothstep(0.2, 0.95, shoreFactor));
+        // Composite water depth color gradient - authentic Aegean crystal turquoise
+        vec3 col = mix(uDeepSapphire, uMidTeal, 1.0 - smoothstep(0.25, 0.85, shoreFactor));
         col = mix(col, uShallowTurquoise, shallowGrad);
 
-        // Blend seabed pebbles & caustics into crystal shallows
-        col = mix(col, pebbleCol, shallowGrad * 0.36 * uClarity);
-        col += vec3(0.55, 0.92, 0.88) * caustics * (0.35 + 0.65 * shallowGrad);
+        // Blend seabed pebbles & caustics into luminous crystal shallows
+        col = mix(col, pebbleCol, shallowGrad * 0.28 * uClarity);
+        col += vec3(0.48, 0.95, 0.90) * caustics * (0.42 + 0.58 * shallowGrad);
 
         // Subtle wave crest highlight
         float crest = clamp(r1 * 0.8 + 0.3, 0.0, 1.0);
@@ -215,7 +216,7 @@ export function createAegeanWater(): WaterHandles {
         float froth = smoothstep(0.08, 0.0, abs(shoreFactor - 0.02 + sin(vWorldPos.x * 2.5 + uTime * 1.8) * 0.012));
         col = mix(col, vec3(0.94, 0.98, 0.99), froth * 0.45);
 
-        float alpha = mix(0.88, 0.98, smoothstep(0.0, 0.3, shoreFactor));
+        float alpha = mix(0.68, 0.94, smoothstep(0.0, 0.4, shoreFactor));
         gl_FragColor = vec4(col, alpha);
       }
     `,
@@ -223,6 +224,7 @@ export function createAegeanWater(): WaterHandles {
 
   const mesh = new THREE.Mesh(waterGeo, waterMat);
   mesh.position.y = 0.0;
+  mesh.renderOrder = 2;
 
   return {
     mesh,

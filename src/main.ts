@@ -87,8 +87,10 @@ const hemiLight = new THREE.HemisphereLight(0xdbeeff, 0x8fb8ad, 0.88);
 hemiLight.position.set(0, 40, 0);
 scene.add(hemiLight);
 
-const sunLight = new THREE.DirectionalLight(0xfff8ea, 2.55);
-sunLight.position.set(22, 34, -14);
+const sunLight = new THREE.DirectionalLight(0xfff8ea, 2.75);
+sunLight.position.set(24, 36, 16);
+sunLight.target.position.set(0, 1.2, -4.5);
+scene.add(sunLight.target);
 sunLight.castShadow = true;
 sunLight.shadow.mapSize.width = 4096;
 sunLight.shadow.mapSize.height = 4096;
@@ -105,7 +107,7 @@ scene.add(sunLight);
 
 // Subtle bounce light from whitewashed Cycladic walls & Aegean sea surface
 const bounceLight = new THREE.DirectionalLight(0x9be2dc, 0.62);
-bounceLight.position.set(-18, 12, -24);
+bounceLight.position.set(-16, 14, -8);
 scene.add(bounceLight);
 
 // 5. Build Aegean Water & 3D Cycladic Village World
