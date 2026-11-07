@@ -423,9 +423,9 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     roughness: 0.88,
   });
 
-  // Harbor platform ends cleanly at z = -3.7 so crystal-clear turquoise water comes right up to the patio edge!
-  const harborBase = new THREE.Mesh(new THREE.BoxGeometry(13.2, 1.2, 8.2), patioMat);
-  harborBase.position.set(0.2, 0.15, 0.4);
+  // Harbor platform ends cleanly at z = -3.7 and x = -4.25 so crystal-clear turquoise water comes right up to the patio edge and Bougainvillea lane!
+  const harborBase = new THREE.Mesh(new THREE.BoxGeometry(11.2, 1.2, 8.2), patioMat);
+  harborBase.position.set(1.35, 0.15, 0.4);
   harborBase.receiveShadow = true;
   harborBase.castShadow = true;
   worldGroup.add(harborBase);
@@ -468,13 +468,13 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   worldGroup.add(cobbleInst);
 
   // Left Cycladic House (House A: features Pergola Stripes on roof in Ch 01 & Pastel Shutters facing +Z patio in Ch 02/04!)
-  const leftHouse = createCycladicHouse(4.5, 4.75, 4.8);
-  leftHouse.position.set(-3.45, 0.75, -3.55);
+  const leftHouse = createCycladicHouse(3.6, 4.75, 4.2);
+  leftHouse.position.set(-2.45, 0.75, -3.85);
   worldGroup.add(leftHouse);
 
   // Terracotta pergola slats on the inner roof edge of Left House (matching Chapter 01 frame_001-003)
   const slatGroup = new THREE.Group();
-  slatGroup.position.set(-2.35, 5.56, -1.65);
+  slatGroup.position.set(-1.55, 5.56, -2.15);
   for (let i = 0; i < 14; i++) {
     const slat = new THREE.Mesh(new THREE.BoxGeometry(0.068, 0.035, 0.78), terracottaMat);
     slat.position.set(-1.35 + i * 0.21, 0, 0);
@@ -485,21 +485,21 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   }
   worldGroup.add(slatGroup);
 
-  // Iconic Pastel Turquoise Louvered Shutters on South/Patio-Facing Wall of Left House (facing +Z so camera at z=+1.5 looking towards -Z sees it straight-on just like frames 04 & 08!)
+  // Iconic Pastel Turquoise Louvered Shutters on South/Patio-Facing Wall of Left House (facing +Z so camera at z=+2.15..2.45 looking towards -Z sees it straight-on just like frames 04 & 08!)
   const pastelShutterPatio = createShutteredWindow(1.18, 1.68, turquoiseShutterMat);
-  pastelShutterPatio.position.set(-1.95, 2.55, -1.12);
+  pastelShutterPatio.position.set(-1.95, 2.62, -1.72);
   pastelShutterPatio.rotation.y = 0;
   worldGroup.add(pastelShutterPatio);
 
   // Sea-facing turquoise shutter on Left House (visible in Aerial Overview frame 15 & 16!)
   const seaShutterLeft = createShutteredWindow(1.15, 1.65, turquoiseShutterMat);
-  seaShutterLeft.position.set(-3.45, 2.65, -5.97);
+  seaShutterLeft.position.set(-2.45, 2.65, -5.97);
   seaShutterLeft.rotation.y = Math.PI;
   worldGroup.add(seaShutterLeft);
 
   // Side shutter on Left House facing courtyard
   const sideShutterLeft = createShutteredWindow(0.95, 1.45, turquoiseShutterMat);
-  sideShutterLeft.position.set(-1.18, 2.65, -3.2);
+  sideShutterLeft.position.set(-0.62, 2.65, -3.85);
   sideShutterLeft.rotation.y = Math.PI / 2;
   worldGroup.add(sideShutterLeft);
 
@@ -751,12 +751,12 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   parapetCap.receiveShadow = true;
   linenTerraceGroup.add(parapetCap);
 
-  const linenHouse = createCycladicHouse(4.6, 5.2, 6.4);
-  linenHouse.position.set(4.1, 0, -0.2);
+  const linenHouse = createCycladicHouse(3.6, 5.2, 6.2);
+  linenHouse.position.set(3.55, 0, -0.2);
   linenTerraceGroup.add(linenHouse);
 
   const linenHouseShutter = createShutteredWindow(0.95, 1.45, turquoiseShutterMat);
-  linenHouseShutter.position.set(1.78, 3.15, -1.65);
+  linenHouseShutter.position.set(1.73, 3.15, -1.65);
   linenHouseShutter.rotation.y = -Math.PI / 2;
   linenTerraceGroup.add(linenHouseShutter);
 
@@ -941,8 +941,8 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     map: slateTex,
     roughness: 0.84,
   });
-  const laneFloor = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.4, 13.5), slateMat);
-  laneFloor.position.set(0, -0.1, 0.2);
+  const laneFloor = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.4, 9.6), slateMat);
+  laneFloor.position.set(0, -0.1, 2.15);
   laneFloor.receiveShadow = true;
   laneGroup.add(laneFloor);
 
@@ -1124,8 +1124,8 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     map: cobbleTex.map,
     roughness: 0.92,
   });
-  const seawall = new THREE.Mesh(new THREE.BoxGeometry(31, 2.0, 22), seawallMat);
-  seawall.position.set(-4.2, -0.35, 7.8);
+  const seawall = new THREE.Mesh(new THREE.BoxGeometry(31, 2.0, 18), seawallMat);
+  seawall.position.set(-4.2, -0.35, 9.8);
   seawall.receiveShadow = true;
   seawall.castShadow = true;
   worldGroup.add(seawall);

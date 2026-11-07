@@ -103,9 +103,9 @@ sunLight.shadow.bias = -0.00035;
 sunLight.shadow.normalBias = 0.018;
 scene.add(sunLight);
 
-// Subtle bounce light from whitewashed Cycladic walls
-const bounceLight = new THREE.DirectionalLight(0x9be2dc, 0.45);
-bounceLight.position.set(-18, 8, -22);
+// Subtle bounce light from whitewashed Cycladic walls & Aegean sea surface
+const bounceLight = new THREE.DirectionalLight(0x9be2dc, 0.62);
+bounceLight.position.set(-18, 12, -24);
 scene.add(bounceLight);
 
 // 5. Build Aegean Water & 3D Cycladic Village World
@@ -275,7 +275,7 @@ function updateSunPosition(norm: number): void {
   sunLight.position.set(
     Math.sin(azimuth) * radius,
     elevation * radius,
-    -Math.cos(azimuth) * radius * 0.65,
+    Math.cos(azimuth) * radius * 0.72,
   );
   sunDirection.copy(sunLight.position).normalize();
 
