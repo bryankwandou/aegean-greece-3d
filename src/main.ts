@@ -358,6 +358,8 @@ if (initViewParam === "overview") {
   if (!Number.isNaN(idx)) {
     selectChapter(idx, true);
   }
+} else {
+  selectChapter(0, true);
 }
 
 // Resize Handler

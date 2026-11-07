@@ -245,6 +245,20 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     body.receiveShadow = true;
     group.add(body);
 
+    // Subtle horizontal reveal grooves on the stucco facade (authentic Cycladic detail in frames 05, 11, 13)
+    const grooveMat = new THREE.MeshStandardMaterial({ color: 0xd8d4ca, roughness: 0.9 });
+    for (const gy of [h * 0.35, h * 0.68]) {
+      const grooveF = new THREE.Mesh(new THREE.BoxGeometry(w + 0.02, 0.025, 0.015), grooveMat);
+      grooveF.position.set(0, gy, -d / 2 - 0.005);
+      const grooveB = new THREE.Mesh(new THREE.BoxGeometry(w + 0.02, 0.025, 0.015), grooveMat);
+      grooveB.position.set(0, gy, d / 2 + 0.005);
+      const grooveL = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.025, d + 0.02), grooveMat);
+      grooveL.position.set(-w / 2 - 0.005, gy, 0);
+      const grooveR = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.025, d + 0.02), grooveMat);
+      grooveR.position.set(w / 2 + 0.005, gy, 0);
+      group.add(grooveF, grooveB, grooveL, grooveR);
+    }
+
     const rimThickness = 0.22;
     const rimHeight = 0.24;
     const frontRim = new THREE.Mesh(new THREE.BoxGeometry(w + 0.08, rimHeight, rimThickness), whiteWallMat);
@@ -265,6 +279,21 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
 
     group.add(frontRim, backRim, leftRim, rightRim);
     return group;
+  }
+
+  function createWallLantern(): THREE.Group {
+    const lantern = new THREE.Group();
+    const bracket = new THREE.Mesh(new THREE.BoxGeometry(0.035, 0.035, 0.16), darkIronMat);
+    bracket.position.set(0, 0, 0.08);
+    const cage = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.18, 0.12), darkIronMat);
+    cage.position.set(0, -0.06, 0.16);
+    const glass = new THREE.Mesh(
+      new THREE.BoxGeometry(0.09, 0.14, 0.09),
+      new THREE.MeshStandardMaterial({ color: 0xfffae0, emissive: 0xffe890, emissiveIntensity: 0.35 }),
+    );
+    glass.position.set(0, -0.06, 0.16);
+    lantern.add(bracket, cage, glass);
+    return lantern;
   }
 
   function createLemonCluster(radius: number, leafCount: number, lemonCount: number): THREE.Group {
@@ -870,13 +899,17 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
   lowCanopy3.position.set(-0.15, 2.42, -0.15);
   harborTreeGroup.add(lowCanopy3);
 
-  // Courtyard Lemon Canopy for Chapter 01 (frames the lower half of Chapter 01 while leaving the boat in the cove 100% clear!)
+  // Courtyard Lemon Canopy for Chapter 01 (frames the foreground matching DACI75PglF1j3tK9k.mp4 frame_001!)
   const courtyardCanopyPositions: [number, number, number, number][] = [
-    [-1.75, 3.85, 1.65, 1.22],
-    [-0.25, 3.62, 1.95, 1.32],
-    [1.15, 3.82, 1.75, 1.22],
-    [-0.95, 4.08, 1.05, 1.12],
-    [0.65, 4.02, 1.05, 1.15],
+    [-0.78, 5.25, 4.42, 1.05],
+    [0.88, 5.15, 4.42, 1.12],
+    [0.05, 4.82, 4.15, 1.25],
+    [-1.45, 4.95, 3.85, 1.12],
+    [1.35, 4.95, 3.85, 1.15],
+    [-0.45, 4.35, 2.85, 1.18],
+    [0.55, 4.35, 2.85, 1.22],
+    [-1.75, 3.85, 1.65, 1.15],
+    [1.15, 3.82, 1.75, 1.15],
   ];
   for (const [cx, cy, cz, cr] of courtyardCanopyPositions) {
     const cluster = createLemonCluster(cr, 155, 16);
@@ -1285,17 +1318,41 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
     house.position.set(v.x, v.y, v.z);
     worldGroup.add(house);
 
+    // Chimneys & vents on rooftops
     const chimney = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 0.68, 12), whiteWallMat);
     chimney.position.set(v.x + v.w * 0.25, v.y + v.h + 0.34, v.z - v.d * 0.2);
     chimney.castShadow = true;
-    worldGroup.add(chimney);
+    const chimneyCap = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.06, 0.52), terracottaMat);
+    chimneyCap.position.set(v.x + v.w * 0.25, v.y + v.h + 0.71, v.z - v.d * 0.2);
+    chimneyCap.castShadow = true;
+    worldGroup.add(chimney, chimneyCap);
 
-    const win = createShutteredWindow(0.88, 1.32, turquoiseShutterMat);
-    win.position.set(v.x - v.w * 0.22, v.y + v.h * 0.56, v.z - v.d / 2 - 0.02);
-    win.rotation.y = Math.PI;
-    worldGroup.add(win);
+    // Secondary roof vent / plinth
+    const vent = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.32, 0.42), whiteWallMat);
+    vent.position.set(v.x - v.w * 0.28, v.y + v.h + 0.16, v.z + v.d * 0.22);
+    vent.castShadow = true;
+    worldGroup.add(vent);
+
+    // Front-facing window (facing negative Z toward harbor)
+    const winFront = createShutteredWindow(0.88, 1.32, turquoiseShutterMat);
+    winFront.position.set(v.x - v.w * 0.22, v.y + v.h * 0.56, v.z - v.d / 2 - 0.02);
+    winFront.rotation.y = Math.PI;
+    worldGroup.add(winFront);
+
+    // Back-facing window (facing positive Z toward inland hillside - removes bare cube look!)
+    const winBack = createShutteredWindow(0.88, 1.32, turquoiseShutterMat);
+    winBack.position.set(v.x - v.w * 0.2, v.y + v.h * 0.54, v.z + v.d / 2 + 0.02);
+    winBack.rotation.y = 0;
+    worldGroup.add(winBack);
+
+    // Side-facing window (east or west)
+    const winSide = createShutteredWindow(0.82, 1.25, turquoiseShutterMat);
+    winSide.position.set(v.x + v.w / 2 + 0.02, v.y + v.h * 0.52, v.z);
+    winSide.rotation.y = Math.PI / 2;
+    worldGroup.add(winSide);
 
     if (v.hasDoor) {
+      // Front blue arched door
       const door = new THREE.Mesh(new THREE.BoxGeometry(0.92, 2.05, 0.08), blueDoorMat);
       door.position.set(v.x + v.w * 0.18, v.y + 1.05, v.z - v.d / 2 - 0.02);
       door.castShadow = true;
@@ -1309,45 +1366,77 @@ export function buildAegeanWorld(scene: THREE.Scene): AnimatedSceneHandles {
       doorArch.rotation.y = Math.PI / 2;
       doorArch.position.set(v.x + v.w * 0.18, v.y + 2.05, v.z - v.d / 2 - 0.02);
       worldGroup.add(doorArch);
+
+      // Sconce / Wall lantern beside front door (matching frame_013!)
+      const frontLantern = createWallLantern();
+      frontLantern.position.set(v.x + v.w * 0.18 + 0.68, v.y + 1.85, v.z - v.d / 2 - 0.02);
+      frontLantern.rotation.y = Math.PI;
+      worldGroup.add(frontLantern);
+
+      // Rear doorway facing inland lane / hillside
+      const rearDoor = new THREE.Mesh(new THREE.BoxGeometry(0.92, 2.05, 0.08), blueDoorMat);
+      rearDoor.position.set(v.x + v.w * 0.15, v.y + 1.05, v.z + v.d / 2 + 0.02);
+      rearDoor.castShadow = true;
+      worldGroup.add(rearDoor);
+
+      const rearLantern = createWallLantern();
+      rearLantern.position.set(v.x + v.w * 0.15 + 0.65, v.y + 1.85, v.z + v.d / 2 + 0.02);
+      worldGroup.add(rearLantern);
+
+      // Terracotta flower pots at doorways
+      const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.13, 0.28, 12), terracottaMat);
+      pot.position.set(v.x + v.w * 0.18 - 0.62, v.y + 0.14, v.z - v.d / 2 - 0.22);
+      pot.castShadow = true;
+      worldGroup.add(pot);
     }
   }
 
   // Sculpted Mediterranean Limestone Coastal Cliffs behind the village (z > 4)
-  const cliffGeo = new THREE.PlaneGeometry(180, 95, 72, 48);
+  const cliffGeo = new THREE.PlaneGeometry(240, 120, 80, 60);
   cliffGeo.rotateX(-Math.PI / 2);
   const cPos = cliffGeo.attributes.position;
   for (let i = 0; i < cPos.count; i++) {
     const x = cPos.getX(i);
     const z = cPos.getZ(i);
-    const hillSlope = Math.max(0, (z + 25) * 0.12);
+    const hillSlope = Math.max(0, (z + 40) * 0.16);
     const ridge =
-      Math.sin(x * 0.065) * 1.9 +
-      Math.cos(z * 0.09 + x * 0.04) * 1.2 +
-      Math.sin(x * 0.22 - z * 0.18) * 0.35;
-    cPos.setY(i, hillSlope + ridge);
+      Math.sin(x * 0.055) * 2.2 +
+      Math.cos(z * 0.08 + x * 0.035) * 1.5 +
+      Math.sin(x * 0.18 - z * 0.14) * 0.45;
+
+    // Smooth boundary falloff so hillside slopes naturally below sea level on the flanks
+    const normX = Math.abs(x) / 120.0;
+    const normZ = Math.abs(z) / 60.0;
+    const borderFade = Math.cos(normX * Math.PI * 0.5) * Math.cos(normZ * Math.PI * 0.5);
+    const finalY = (hillSlope + ridge) * Math.max(0, borderFade) - 1.2;
+    cPos.setY(i, finalY);
   }
   cliffGeo.computeVertexNormals();
 
   const cliffMat = new THREE.MeshStandardMaterial({
-    color: 0xb6a489,
+    color: 0xb4a287,
     map: cobbleTex.map,
     bumpMap: cobbleTex.bumpMap,
-    bumpScale: 0.08,
+    bumpScale: 0.06,
     roughness: 0.94,
   });
   const cliffMesh = new THREE.Mesh(cliffGeo, cliffMat);
-  cliffMesh.position.set(-2, -0.45, 52);
+  cliffMesh.position.set(-2, -0.5, 48);
   cliffMesh.receiveShadow = true;
   worldGroup.add(cliffMesh);
 
-  // Rocky limestone seawall foundation
+  // Natural Mediterranean curved rocky coastline foundation (tapered edges, no sharp box corners!)
+  const seawallGeo = new THREE.CylinderGeometry(15.5, 18.2, 1.8, 36);
+  seawallGeo.scale(1.15, 1.0, 0.78);
   const seawallMat = new THREE.MeshStandardMaterial({
-    color: 0x847c6c,
+    color: 0x9e927c,
     map: cobbleTex.map,
-    roughness: 0.92,
+    bumpMap: cobbleTex.bumpMap,
+    bumpScale: 0.05,
+    roughness: 0.94,
   });
-  const seawall = new THREE.Mesh(new THREE.BoxGeometry(31, 2.0, 18), seawallMat);
-  seawall.position.set(-4.2, -0.35, 9.8);
+  const seawall = new THREE.Mesh(seawallGeo, seawallMat);
+  seawall.position.set(-3.5, -0.65, 8.5);
   seawall.receiveShadow = true;
   seawall.castShadow = true;
   worldGroup.add(seawall);
