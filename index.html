@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AEGEAN — A Little Corner of Greece</title>
+    <meta
+      name="description"
+      content="An interactive 3D Mediterranean coastal village in the Greek Cyclades. Explore sunlit lemon courtyards, crystal harbor waters, billowing linen terraces, pastel shutters, and bougainvillea lanes."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="aegean-canvas" aria-label="Interactive 3D scene of a Greek Cycladic coastal village"></canvas>
+
+      <!-- Top Bar -->
+      <header class="hud-top">
+        <div class="brand-lockup" role="banner">
+          <span class="brand-title">AEGEAN</span>
+          <span class="brand-subtitle">A LITTLE CORNER OF GREECE</span>
+        </div>
+
+        <div class="top-actions">
+          <button
+            id="btn-menu"
+            class="circle-btn"
+            type="button"
+            aria-label="Open atmosphere and scene controls"
+            aria-expanded="false"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="5" cy="12" r="1.8" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+              <circle cx="19" cy="12" r="1.8" fill="currentColor" />
+            </svg>
+          </button>
+
+          <!-- Atmosphere & Realism Popover -->
+          <aside id="atmosphere-panel" class="atmosphere-panel" aria-label="Scene atmosphere controls" hidden>
+            <div class="panel-header">
+              <span class="panel-kicker">ATMOSPHERE &amp; LIGHT</span>
+              <button id="btn-sound" class="pill-toggle" type="button" aria-pressed="false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                </svg>
+                <span id="sound-label">Sea Audio Off</span>
+              </button>
+            </div>
+
+            <div class="control-group">
+              <div class="control-row">
+                <label for="slider-sun">Mediterranean Sun</label>
+                <span id="val-sun" class="control-value">Afternoon</span>
+              </div>
+              <input id="slider-sun" type="range" min="0" max="100" value="62" />
+            </div>
+
+            <div class="control-group">
+              <div class="control-row">
+                <label for="slider-breeze">Meltemi Sea Breeze</label>
+                <span id="val-breeze" class="control-value">Gentle</span>
+              </div>
+              <input id="slider-breeze" type="range" min="10" max="100" value="48" />
+            </div>
+
+            <div class="control-group">
+              <div class="control-row">
+                <label for="slider-water">Water Caustics &amp; Clarity</label>
+                <span id="val-water" class="control-value">92%</span>
+              </div>
+              <input id="slider-water" type="range" min="20" max="100" value="92" />
+            </div>
+
+            <div class="panel-footer">
+              <button id="btn-autotour" class="secondary-btn" type="button" aria-pressed="false">
+                Auto-Cycle Chapters
+              </button>
+              <span class="hint-text">Drag to orbit · Scroll to zoom · Keys 1–5</span>
+            </div>
+          </aside>
+        </div>
+      </header>
+
+      <!-- Bottom Editorial Copy -->
+      <section class="hud-editorial" aria-live="polite">
+        <p id="chapter-kicker" class="editorial-kicker">01 / UNDER THE LEMON TREE</p>
+        <h1 id="chapter-title" class="editorial-title">
+          <span>A little closer</span>
+          <span>to the sea.</span>
+        </h1>
+        <p id="chapter-subtitle" class="editorial-subtitle">Salt in the air. Sun on the stone.</p>
+      </section>
+
+      <!-- Bottom Center Chapter Dock -->
+      <nav class="hud-dock" aria-label="Village camera chapters">
+        <button class="dock-item is-active" type="button" data-chapter="0">
+          <span class="dock-index">01</span>
+          <span class="dock-label">Lemon courtyard</span>
+        </button>
+        <button class="dock-item" type="button" data-chapter="1">
+          <span class="dock-index">02</span>
+          <span class="dock-label">Little harbor</span>
+        </button>
+        <button class="dock-item" type="button" data-chapter="2">
+          <span class="dock-index">03</span>
+          <span class="dock-label">Linen terrace</span>
+        </button>
+        <button class="dock-item" type="button" data-chapter="3">
+          <span class="dock-index">04</span>
+          <span class="dock-label">Pastel shutters</span>
+        </button>
+        <button class="dock-item" type="button" data-chapter="4">
+          <span class="dock-index">05</span>
+          <span class="dock-label">Bougainvillea lane</span>
+        </button>
+      </nav>
+
+      <!-- Bottom Right Aerial / Overview Toggle Button -->
+      <div class="hud-bottom-right">
+        <button
+          id="btn-overview"
+          class="circle-btn"
+          type="button"
+          aria-label="Toggle aerial village overview"
+          aria-pressed="false"
+          title="Toggle Aerial Village Overview"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
+
